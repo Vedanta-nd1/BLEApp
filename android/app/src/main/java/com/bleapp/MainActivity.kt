@@ -1,13 +1,268 @@
 package com.bleapp
 
+import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 
-class MainActivity : ReactActivity() {
+private const val ENABLE_BLUETOOTH_REQUEST_CODE = 1
+private const val RUNTIME_PERMISSION_REQUEST_CODE = 2
+const val TAG = "custom_text"
 
-  /**
+@Suppress("DEPRECATION")
+class MainActivity : ReactActivity() {
+    private val bluetoothAdapter: BluetoothAdapter by lazy {
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothManager.adapter
+    }
+    private val bleScanner by lazy {
+        bluetoothAdapter.bluetoothLeScanner
+    }
+
+
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    override fun onResume() {
+        super.onResume()
+        if (!bluetoothAdapter.isEnabled) {
+            promptEnableBluetooth()
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun promptEnableBluetooth() {
+        if (!bluetoothAdapter.isEnabled) {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+//                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(
+//                    Manifest.permission.BLUETOOTH_CONNECT,
+//                ), 0)
+                return
+            }
+            startActivityForResult(enableBtIntent, ENABLE_BLUETOOTH_REQUEST_CODE)
+        }
+    }
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun startBleScan() {
+        if (!hasRequiredRuntimePermissions()) {
+            requestRelevantRuntimePermissions()
+            onResume()
+        } else { /*
+            TODO: Actually perform scan */
+            Log.d(TAG, "startBleScan: scan started!")
+
+//            if (ActivityCompat.checkSelfPermission(
+//                    this,
+//                    Manifest.permission.BLUETOOTH_SCAN
+//                ) != PackageManager.PERMISSION_GRANTED
+//            ) {
+//                // TODO: Consider calling
+//                // ActivityCompat#requestPermissions
+//                return
+//            }
+            // bleScanner.startScan(null, scanSettings, scanCallback)
+        }
+    }
+
+    private fun Context.hasPermission(permissionType: String): Boolean {
+        return ContextCompat.checkSelfPermission(this, permissionType) ==
+                PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun Context.hasRequiredRuntimePermissions(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            hasPermission(Manifest.permission.BLUETOOTH_SCAN) &&
+                    hasPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private fun Activity.requestRelevantRuntimePermissions() {
+        if (hasRequiredRuntimePermissions()) { return }
+        when {
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S -> {
+                requestLocationPermission()
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                requestBluetoothPermissions()
+            }
+        }
+    }
+
+    private fun requestLocationPermission() {
+        runOnUiThread {
+            val alertDialogBuilder = AlertDialog.Builder(this@MainActivity) // Replace YourActivity with your actual activity name
+            alertDialogBuilder.apply {
+                setTitle("Location permission required")
+                setMessage("Starting from Android M (6.0), the system requires apps to be granted " +
+                        "location access in order to scan for BLE devices.")
+                setCancelable(false)
+                setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    ActivityCompat.requestPermissions(
+                        this@MainActivity, // Make sure to replace YourActivity with your actual activity name
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        RUNTIME_PERMISSION_REQUEST_CODE
+                    )
+                    dialog.dismiss()
+                }
+            }
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun requestBluetoothPermissions() {
+        runOnUiThread {
+            val alertDialogBuilder = AlertDialog.Builder(this@MainActivity) // Replace YourActivity with your actual activity name
+            alertDialogBuilder.apply {
+                setTitle("Bluetooth permissions required")
+                setMessage("Starting from Android 12, the system requires apps to be granted " +
+                        "Bluetooth access in order to scan for and connect to BLE devices.")
+                setCancelable(false)
+                setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    ActivityCompat.requestPermissions(
+                        this@MainActivity, // Make sure to replace YourActivity with your actual activity name
+                        arrayOf(
+                            Manifest.permission.BLUETOOTH_SCAN,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ),
+                        RUNTIME_PERMISSION_REQUEST_CODE
+                    )
+                    dialog.dismiss()
+                }
+            }
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+        }
+    }
+
+    private val scanSettings = ScanSettings.Builder()
+        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+        .build()
+
+    private val scanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            with(result.device) {
+                if (ActivityCompat.checkSelfPermission(
+                        this@MainActivity,
+                        Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    return
+                }
+                Log.i("ScanCallback", "Found BLE device! Name: ${name ?: "Unnamed"}, address: $address")
+            }
+        }
+    }
+
+
+//    private fun hasForegroundLocationPermission() =
+//        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+//
+//    private fun hasBackgroundLocationPermission() =
+//        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+//
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private fun hasBluetoothScanPermission() =
+//        ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
+//
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    private fun hasBluetoothConnectPermission() =
+//        ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    @ReactMethod
+//    fun requestPermissions() {
+//        var permissionsToRequest = mutableListOf<String>()
+//        val intent = Intent("com.bleapp.EVENT_TRIGGERED")
+//        sendBroadcast(intent)
+//
+//        if(!hasBackgroundLocationPermission()) {
+//            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+//        }
+//        if(!hasForegroundLocationPermission()) {
+//            permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+//        }
+//        if(!hasBluetoothScanPermission()) {
+//            permissionsToRequest.add(Manifest.permission.BLUETOOTH_SCAN)
+//        }
+//        if(!hasBluetoothConnectPermission()) {
+//            permissionsToRequest.add(Manifest.permission.BLUETOOTH_CONNECT)
+//        }
+//
+//        if(permissionsToRequest.isNotEmpty()) {
+//            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), 0)
+//        }
+//    }
+
+//    @RequiresApi(Build.VERSION_CODES.S)
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<out String>,
+//        grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        when (requestCode) {
+//            RUNTIME_PERMISSION_REQUEST_CODE -> {
+//                val containsPermanentDenial = permissions.zip(grantResults.toTypedArray()).any {
+//                    it.second == PackageManager.PERMISSION_DENIED &&
+//                            !ActivityCompat.shouldShowRequestPermissionRationale(this, it.first)
+//                }
+//                val containsDenial = grantResults.any { it == PackageManager.PERMISSION_DENIED }
+//                val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+//                when {
+//                    containsPermanentDenial -> {
+//                        // TODO: Handle permanent denial (e.g., show AlertDialog with justification)
+//                        // Note: The user will need to navigate to App Settings and manually grant
+//                        // permissions that were permanently denied
+//                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+//                        val uri = Uri.fromParts("bleapp", packageName, null)
+//                        intent.setData(uri)
+//                        startActivity(intent)
+//                    }
+//                    containsDenial -> {
+//                        requestRelevantRuntimePermissions()
+//                    }
+//                    allGranted && hasRequiredRuntimePermissions() -> {
+//                        startBleScan()
+//                    }
+//                    else -> {
+//                        // Unexpected scenario encountered when handling permissions
+//                        recreate()
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+    /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
    */
@@ -19,4 +274,5 @@ class MainActivity : ReactActivity() {
    */
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
+
 }

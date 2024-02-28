@@ -1,19 +1,27 @@
 import * as React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Alert, Button } from 'react-native';
 import Box from '../components/Box.js';
+import IoniconsIcons from 'react-native-vector-icons/Ionicons';
 
-function HomeScreen() {
+function HomeScreen({navigation}) {
     return (
       <View style={{ flex: 1, flexDirection: 'column'}}>
         <TouchableOpacity style={styles.button} onPress={() => Alert.alert("Filter")}>
-        <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-          <Text style={{fontWeight: 'bold', color: 'white'}}> Y </Text>
-          <Text style={{fontSize:17, color: 'white'}}> Filter </Text>
+        <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center',
+            elevation: 5}}>
+          {/* <Text style={{fontWeight: 'bold', color: 'white'}}> Y </Text> */}
+          <IoniconsIcons name="funnel" size={17} color="white" />
+          <Text style={{fontSize:17, color: 'white'}}> 
+            {" "}Filter 
+          </Text>
         </View>
       </TouchableOpacity>
-        <View style={styles.box} ><Box /></View>
-        <View style={styles.box}><Box /></View>
-        <View style={styles.box}><Box /></View>
+
+      <View style={styles.box} ><Box /></View>
+      <View style={styles.box}><Box /></View>
+      <View style={styles.box}><Box /></View>
+
+      {/* <Button onPress={() => navigation.navigate('Settings')} title="Go to Settings" /> */}
         
       </View>
     );
@@ -21,7 +29,7 @@ function HomeScreen() {
 
   const styles = StyleSheet.create({
     box: {
-      height: 110,
+      height: '19%',
       },
 
     button: {

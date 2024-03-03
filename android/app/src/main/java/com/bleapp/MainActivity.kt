@@ -1,6 +1,7 @@
 package com.bleapp
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
@@ -18,24 +19,26 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.WritableMap
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
+import com.facebook.react.modules.core.DeviceEventManagerModule
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.concurrent.scheduleAtFixedRate
 
 private const val ENABLE_BLUETOOTH_REQUEST_CODE = 1
 private const val RUNTIME_PERMISSION_REQUEST_CODE = 2
-const val TAG = "custom_text"
+const val TAG = "custom_tag"
 
 @Suppress("DEPRECATION")
 class MainActivity : ReactActivity() {
+    private var isScanning = false
     private val bluetoothAdapter: BluetoothAdapter by lazy {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothManager.adapter
     }
-    private val bleScanner by lazy {
-        bluetoothAdapter.bluetoothLeScanner
-    }
-
-
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onResume() {
@@ -48,6 +51,7 @@ class MainActivity : ReactActivity() {
     @Suppress("DEPRECATION")
     @RequiresApi(Build.VERSION_CODES.S)
     private fun promptEnableBluetooth() {
+//        Log.d(TAG, "promptEnableBluetooth: ${bluetoothAdapter.name} ")
         if (!bluetoothAdapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             if (ActivityCompat.checkSelfPermission(
@@ -57,33 +61,51 @@ class MainActivity : ReactActivity() {
             ) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
-//                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(
-//                    Manifest.permission.BLUETOOTH_CONNECT,
-//                ), 0)
+                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                ), 0)
                 return
             }
             startActivityForResult(enableBtIntent, ENABLE_BLUETOOTH_REQUEST_CODE)
         }
+        else {
+            Log.d(TAG, "promptEnableBluetooth: bt is enabled")
+        }
     }
     @RequiresApi(Build.VERSION_CODES.S)
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            ENABLE_BLUETOOTH_REQUEST_CODE -> {
+                if (resultCode != Activity.RESULT_OK) {
+                    promptEnableBluetooth()
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
     fun startBleScan() {
-        if (!hasRequiredRuntimePermissions()) {
+        if (!hasRequiredRuntimePermissions() || !bluetoothAdapter.isEnabled) {
+            Log.d(TAG, "startBleScan: bt disabled. Please enable!")
             requestRelevantRuntimePermissions()
-            onResume()
+            promptEnableBluetooth()
         } else { /*
             TODO: Actually perform scan */
             Log.d(TAG, "startBleScan: scan started!")
 
-//            if (ActivityCompat.checkSelfPermission(
-//                    this,
-//                    Manifest.permission.BLUETOOTH_SCAN
-//                ) != PackageManager.PERMISSION_GRANTED
-//            ) {
-//                // TODO: Consider calling
-//                // ActivityCompat#requestPermissions
-//                return
-//            }
-            // bleScanner.startScan(null, scanSettings, scanCallback)
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                return
+            }
+            bleScanner.startScan(null, scanSettings, scanCallback)
+            isScanning = true
         }
     }
 
@@ -161,26 +183,142 @@ class MainActivity : ReactActivity() {
         }
     }
 
+
+
+
+
+
+
+
+//    val filter = ScanFilter.Builder().setServiceUuid(
+//        ParcelUuid.fromString(ENVIRONMENTAL_SERVICE_UUID.toString())
+//    ).build()
+
+    private val bleScanner by lazy {
+        bluetoothAdapter.bluetoothLeScanner
+    }
+
     private val scanSettings = ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
         .build()
 
+    private val BLE_SCAN_RESULT_EVENT = "BLEScanResult"
+
+    @RequiresApi(Build.VERSION_CODES.N)
     private val scanCallback = object : ScanCallback() {
+        @RequiresApi(Build.VERSION_CODES.N)
         override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
             with(result.device) {
                 if (ActivityCompat.checkSelfPermission(
                         this@MainActivity,
                         Manifest.permission.BLUETOOTH_CONNECT
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
+                    // Permission not granted
                     return
                 }
-                Log.i("ScanCallback", "Found BLE device! Name: ${name ?: "Unnamed"}, address: $address")
+
+                // Emitting the scan result to React Native side
+                val scanResultMap = Arguments.createMap()
+                scanResultMap.putString("name", name ?: "Unnamed")
+                scanResultMap.putString("address", address)
+                // Add other parameters as needed
+                val rssi = result.rssi
+                scanResultMap.putInt("rssi", rssi)
+
+                emitScanResultEvent(scanResultMap)
             }
         }
+
+        private val scanResultQueue: PriorityQueue<WritableMap> = PriorityQueue(compareBy { it.getDouble("rssi") })
+        private var isBatchProcessing: Boolean = false
+
+        private fun emitScanResultEvent(scanResult: WritableMap) {
+            try {
+                val rssi = scanResult.getDouble("rssi")
+                if (rssi < -80) {
+                    Log.d("ScanResult1", "Scan result added to queue")
+                    synchronized(scanResultQueue) {
+                        scanResultQueue.add(scanResult)
+                        if (scanResultQueue.size > 20) {
+                            scanResultQueue.poll() // Remove lowest RSSI if queue size exceeds 20
+                        }
+                    }
+                    if (!isBatchProcessing) {
+                        Log.d("ScanResult1", "Starting batch processing")
+                        startBatchProcessing()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ScanResult1", "Error processing scan result: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+
+        private fun startBatchProcessing() {
+            isBatchProcessing = true
+            Timer().scheduleAtFixedRate(0, 3000) {
+                try {
+                    Log.d("ScanResult1", "startBatchProcessing: 5 secs over")
+                    val batchToSend = synchronized(scanResultQueue) {
+                        val batch = ArrayList(scanResultQueue)
+                        scanResultQueue.clear()
+                        batch
+                    }
+                    if (batchToSend.isNotEmpty()) {
+                        sendBatch(batchToSend)
+                    } else {
+                        stopBatchProcessing()
+                    }
+                } catch (e: Exception) {
+                    // Handle any exceptions, e.g., log them
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        @SuppressLint("VisibleForTests")
+        private fun sendBatch(batchToSend: List<WritableMap>) {
+            try {
+                Log.d("ScanResult1", "sendBatch: sending function reached!...")
+
+                // Get the DeviceEventManagerModule
+                val deviceEventEmitter = reactInstanceManager?.currentReactContext?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+
+                // Emit each WritableMap individually
+                batchToSend.forEach { writableMap ->
+                    deviceEventEmitter?.emit(BLE_SCAN_RESULT_EVENT, writableMap)
+                }
+            } catch (e: Exception) {
+                // Handle any exceptions, e.g., log them
+                e.printStackTrace()
+            }
+        }
+
+        private fun stopBatchProcessing() {
+            isBatchProcessing = false
+        }
+
+
+
     }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun stopBleScan() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            return
+        }
+        bleScanner.stopScan(scanCallback)
+        isScanning = false
+    }
+
 
 
 //    private fun hasForegroundLocationPermission() =
@@ -222,45 +360,42 @@ class MainActivity : ReactActivity() {
 //        }
 //    }
 
-//    @RequiresApi(Build.VERSION_CODES.S)
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<out String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        when (requestCode) {
-//            RUNTIME_PERMISSION_REQUEST_CODE -> {
-//                val containsPermanentDenial = permissions.zip(grantResults.toTypedArray()).any {
-//                    it.second == PackageManager.PERMISSION_DENIED &&
-//                            !ActivityCompat.shouldShowRequestPermissionRationale(this, it.first)
-//                }
-//                val containsDenial = grantResults.any { it == PackageManager.PERMISSION_DENIED }
-//                val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
-//                when {
-//                    containsPermanentDenial -> {
-//                        // TODO: Handle permanent denial (e.g., show AlertDialog with justification)
-//                        // Note: The user will need to navigate to App Settings and manually grant
-//                        // permissions that were permanently denied
-//                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-//                        val uri = Uri.fromParts("bleapp", packageName, null)
-//                        intent.setData(uri)
-//                        startActivity(intent)
-//                    }
-//                    containsDenial -> {
-//                        requestRelevantRuntimePermissions()
-//                    }
-//                    allGranted && hasRequiredRuntimePermissions() -> {
-//                        startBleScan()
-//                    }
-//                    else -> {
-//                        // Unexpected scenario encountered when handling permissions
-//                        recreate()
-//                    }
-//                }
-//            }
-//        }
-//    }
+    @RequiresApi(Build.VERSION_CODES.S)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            RUNTIME_PERMISSION_REQUEST_CODE -> {
+                val containsPermanentDenial = permissions.zip(grantResults.toTypedArray()).any {
+                    it.second == PackageManager.PERMISSION_DENIED &&
+                            !ActivityCompat.shouldShowRequestPermissionRationale(this, it.first)
+                }
+                val containsDenial = grantResults.any { it == PackageManager.PERMISSION_DENIED }
+                val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+                when {
+                    containsPermanentDenial -> {
+                        // TODO: Handle permanent denial (e.g., show AlertDialog with justification)
+                        // Note: The user will need to navigate to App Settings and manually grant
+                        // permissions that were permanently denied
+                    }
+                    containsDenial -> {
+                        requestRelevantRuntimePermissions()
+                    }
+                    allGranted && hasRequiredRuntimePermissions() -> {
+                        startBleScan()
+                    }
+                    else -> {
+                        // Unexpected scenario encountered when handling permissions
+                        recreate()
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule

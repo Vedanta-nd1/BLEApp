@@ -13,12 +13,13 @@ export default Box = () => {
 
       <View > 
         <Text style={styles.btName}> Realme 7 </Text>
-        <Text style={styles.btUUID}> 12:4D:D5:1A:5E:6E </Text>
+        <Text style={styles.btUUID}> alskdnalsndfalsjfn </Text>
         <Text style={styles.btStrength}> 
           <MaterialCommunityIcon name="wifi-strength-2" size={20} color="black" /> {" "}
-          -65 dbm    {" "}
+          -90    {" dbm"}
          <FontAwesome5Icon name="arrows-alt-h" size={20} color="black" /> {" "}
-         430.0 ms </Text>
+          {/* 430.0 ms  */}
+         </Text>
       </View>
     </View>
   ) 

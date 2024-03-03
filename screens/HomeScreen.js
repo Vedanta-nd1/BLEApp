@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Alert, Button } from 'react-native';
 import Box from '../components/Box.js';
 import IoniconsIcons from 'react-native-vector-icons/Ionicons';
+import DeviceList from '../components/DeviceList.js';
 
 function HomeScreen({navigation}) {
     return (
@@ -17,9 +18,10 @@ function HomeScreen({navigation}) {
         </View>
       </TouchableOpacity>
 
-      <View style={styles.box} ><Box /></View>
+      {/* <View style={styles.box} ><Box /></View>
       <View style={styles.box}><Box /></View>
-      <View style={styles.box}><Box /></View>
+      <View style={styles.box}><Box /></View> */}
+      <DeviceList />
 
       {/* <Button onPress={() => navigation.navigate('Settings')} title="Go to Settings" /> */}
         

@@ -4,7 +4,7 @@ import Box from '../components/Box.js';
 import IoniconsIcons from 'react-native-vector-icons/Ionicons';
 import DeviceList from '../components/DeviceList.js';
 
-function HomeScreen({navigation}) {
+function HomeScreen({navigation, data, setData}) {
     return (
       <View style={{ flex: 1, flexDirection: 'column'}}>
         <TouchableOpacity style={styles.button} onPress={() => Alert.alert("Filter")}>
@@ -21,7 +21,7 @@ function HomeScreen({navigation}) {
       {/* <View style={styles.box} ><Box /></View>
       <View style={styles.box}><Box /></View>
       <View style={styles.box}><Box /></View> */}
-      <DeviceList />
+      {data? <DeviceList /> : null}
 
       {/* <Button onPress={() => navigation.navigate('Settings')} title="Go to Settings" /> */}
         

@@ -5,7 +5,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
@@ -108,6 +111,8 @@ class MainActivity : ReactActivity() {
             isScanning = true
         }
     }
+
+
 
     private fun Context.hasPermission(permissionType: String): Boolean {
         return ContextCompat.checkSelfPermission(this, permissionType) ==
@@ -237,11 +242,11 @@ class MainActivity : ReactActivity() {
         private fun emitScanResultEvent(scanResult: WritableMap) {
             try {
                 val rssi = scanResult.getDouble("rssi")
-                if (rssi < -80) {
+                if (rssi < -90) {
                     Log.d("ScanResult1", "Scan result added to queue")
                     synchronized(scanResultQueue) {
                         scanResultQueue.add(scanResult)
-                        if (scanResultQueue.size > 20) {
+                        if (scanResultQueue.size > 10) {
                             scanResultQueue.poll() // Remove lowest RSSI if queue size exceeds 20
                         }
                     }
@@ -317,6 +322,60 @@ class MainActivity : ReactActivity() {
         }
         bleScanner.stopScan(scanCallback)
         isScanning = false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun connectToDevice(address: String) {
+        // Connect to the device using the provided address
+        // Example code for connecting to the device
+        val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address)
+        stopBleScan()
+        Log.d("Connext", "Connecting to $address")
+        // Implement your connection logic here
+        if (isScanning) {
+            stopBleScan()
+        }
+
+        with(device) {
+            if (ActivityCompat.checkSelfPermission(
+                    this@MainActivity,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                return
+            }
+            connectGatt(this@MainActivity, false, gattCallback)
+        }
+    }
+
+    private val gattCallback = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+            val deviceAddress = gatt.device.address
+
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    Log.w("BluetoothGattCallback", "Successfully connected to $deviceAddress")
+                    // TODO: Store a reference to BluetoothGatt
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    Log.w("BluetoothGattCallback", "Successfully disconnected from $deviceAddress")
+                    if (ActivityCompat.checkSelfPermission(
+                            this@MainActivity,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        return
+                    }
+                    gatt.close()
+                }
+            } else {
+                Log.w("BluetoothGattCallback", "Error $status encountered for $deviceAddress! Disconnecting...")
+                gatt.close()
+            }
+        }
     }
 
 

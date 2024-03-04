@@ -13,7 +13,7 @@ import {navigationRef} from './RootNavigation';
 const Tab = createBottomTabNavigator();
 const myRef = React.createRef();
 const {PermissionsModule} = NativeModules;
-import DeviceList from './components/DeviceList';   
+// import DeviceList from './components/DeviceList';   
 
 
 DeviceEventEmitter.addListener('BLEScanResult', (scanResult) => {
@@ -50,7 +50,7 @@ export default function App() {
                   }
                   style={styles.headerTheme}
                 >
-                  {isScanning? <MaterialIcon name='square' size={16} color={'black'}/> :
+                  {isScanning? <><Text style={{color:'black'}}>Scanning</Text> <MaterialIcon name='square' size={16} color={'black'} style={{marginRight:8}}/> </>:
                               <Text style={{color: 'black'}}>Scan</Text>}
                 </ TouchableOpacity>
                 {/* <Button onPress={
@@ -69,11 +69,14 @@ export default function App() {
         }}
       >
 
-        <Tab.Screen name="Home" component={HomeScreen} 
-        options={{
-          tabBarItemStyle: styles.barItem,
-          tabBarIcon: ({color}) => <EntypoIcon name="home" size={24} color={color} />, 
-        }} />
+        <Tab.Screen name="Home" 
+          // component={HomeScreen} 
+          options={{
+            tabBarItemStyle: styles.barItem,
+            tabBarIcon: ({color}) => <EntypoIcon name="home" size={24} color={color} />}} 
+          >
+          {props => <HomeScreen {...props} data={isScanning} setData={setIsScanning} />} 
+          </Tab.Screen>
         <Tab.Screen name="Raw" component={RawScreen}  
         options={{
           tabBarItemStyle: styles.barItem,

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, NativeModules } from 'react-native';
 import { DeviceEventEmitter } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// import Box from './Box';
+const {PermissionsModule} = NativeModules;
 
 const DeviceList = () => {
   const [devices, setDevices] = useState([]);
@@ -35,19 +35,9 @@ const DeviceList = () => {
   };
 
   const renderDeviceItem = ({ item }) => (
-    <View style={{
-        padding: 5,
-        // borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-    }}>
-      {/* <Text>Name: {item.name}</Text>
-      <Text>Address: {item.address}</Text>
-      <Text>Signal Strength: {item.rssi}</Text> */}
-      {/* <Box name={item.name} address={item.address} rssi={item.rssi} /> */}
-
+    <TouchableOpacity onPress={() => {connectAlert(item.name, item.address)}}>
       <View style={[styles.box, {flexDirection:'row', flex:1}]}> 
         <View style={styles.btIcon} >
-          {/* <Text style={{color:'white', fontSize:25}}> B</Text> */}
           <FeatherIcon name="bluetooth" style={styles.btIcon} />
         </View>
 
@@ -64,7 +54,7 @@ const DeviceList = () => {
     </View>
 
       {/* Render other device information as needed */}
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -81,6 +71,25 @@ const DeviceList = () => {
 
 export default DeviceList;
 
+const connectAlert = (name, address) => {
+  Alert.alert(
+    "Connect to " + name + "?",
+    "Do you want to connect to this device? \n" + address,
+    [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel"
+      },
+      { text: "Connect", onPress: () => 
+        {PermissionsModule.connectToDevice(address)} 
+        // console.log("Connect Pressed")
+    }
+    ],
+    { cancelable: true }
+  );
+}
+
 const styles = StyleSheet.create({
   box: {
     backgroundColor: '#ffffff',
@@ -91,7 +100,8 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     padding: 5,
     elevation: 10, // for shadow in Android
-    margin: 8,
+    margin: 3,
+    marginHorizontal: 8,
     },
 
   btIcon: {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import EntypoIcons from 'react-native-vector-icons/Entypo';
 import * as RootNavigation from '../RootNavigation.js';
 

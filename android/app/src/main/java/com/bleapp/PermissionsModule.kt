@@ -1,13 +1,13 @@
 package com.bleapp
 
+import android.bluetooth.BluetoothAdapter
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.modules.core.DeviceEventManagerModule
+
 
 class PermissionsModule (reactContext : ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     override fun getName(): String {
@@ -37,13 +37,9 @@ class PermissionsModule (reactContext : ReactApplicationContext) : ReactContextB
         mainActivity?.stopBleScan()
     }
 
-//    @ReactMethod
-//    fun sendScanResult(name: String?, address: String?) {
-//        val params = Arguments.createMap()
-//        params.putString("name", name)
-//        params.putString("address", address)
-//        reactApplicationContext
-//            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-//            .emit("onScanResult", params)
-//    }
+    @ReactMethod
+    fun connectToDevice(address: String) {
+        val mainActivity = currentActivity as MainActivity?
+        mainActivity?.connectToDevice(address)
+    }
 }

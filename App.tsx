@@ -15,7 +15,6 @@ const myRef = React.createRef();
 const {PermissionsModule} = NativeModules;
 // import DeviceList from './components/DeviceList';   
 
-
 DeviceEventEmitter.addListener('BLEScanResult', (scanResult) => {
   console.log('Received scan result:', scanResult);
   // Access parameters: scanResult.name, scanResult.address, scanResult.rssi
@@ -50,7 +49,7 @@ export default function App() {
                   }
                   style={styles.headerTheme}
                 >
-                  {isScanning? <><Text style={{color:'black'}}>Scanning</Text> <MaterialIcon name='square' size={16} color={'black'} style={{marginRight:8}}/> </>:
+                  {isScanning? <MaterialIcon name='square' size={16} color={'black'} style={{marginRight:8}}/> :
                               <Text style={{color: 'black'}}>Scan</Text>}
                 </ TouchableOpacity>
                 {/* <Button onPress={

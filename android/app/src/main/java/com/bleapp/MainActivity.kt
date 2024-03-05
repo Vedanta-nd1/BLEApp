@@ -242,7 +242,7 @@ class MainActivity : ReactActivity() {
         private fun emitScanResultEvent(scanResult: WritableMap) {
             try {
                 val rssi = scanResult.getDouble("rssi")
-                if (rssi < -90) {
+                if (rssi < -85) {
                     Log.d("ScanResult1", "Scan result added to queue")
                     synchronized(scanResultQueue) {
                         scanResultQueue.add(scanResult)
@@ -273,6 +273,7 @@ class MainActivity : ReactActivity() {
                     }
                     if (batchToSend.isNotEmpty()) {
                         sendBatch(batchToSend)
+                        batchToSend.clear()
                     } else {
                         stopBatchProcessing()
                     }
@@ -286,7 +287,6 @@ class MainActivity : ReactActivity() {
         @SuppressLint("VisibleForTests")
         private fun sendBatch(batchToSend: List<WritableMap>) {
             try {
-                Log.d("ScanResult1", "sendBatch: sending function reached!...")
 
                 // Get the DeviceEventManagerModule
                 val deviceEventEmitter = reactInstanceManager?.currentReactContext?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
@@ -330,7 +330,7 @@ class MainActivity : ReactActivity() {
         // Example code for connecting to the device
         val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address)
         stopBleScan()
-        Log.d("Connext", "Connecting to $address")
+        Log.d("Connext", "Connecting to ${device.name ?: "Unnamed"} : $address")
         // Implement your connection logic here
         if (isScanning) {
             stopBleScan()
@@ -356,10 +356,10 @@ class MainActivity : ReactActivity() {
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    Log.w("BluetoothGattCallback", "Successfully connected to $deviceAddress")
+                    Log.w("Connext", "Successfully connected to $deviceAddress")
                     // TODO: Store a reference to BluetoothGatt
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    Log.w("BluetoothGattCallback", "Successfully disconnected from $deviceAddress")
+                    Log.w("Connext", "Successfully disconnected from $deviceAddress")
                     if (ActivityCompat.checkSelfPermission(
                             this@MainActivity,
                             Manifest.permission.BLUETOOTH_CONNECT
@@ -372,7 +372,7 @@ class MainActivity : ReactActivity() {
                     gatt.close()
                 }
             } else {
-                Log.w("BluetoothGattCallback", "Error $status encountered for $deviceAddress! Disconnecting...")
+                Log.w("Connext", "Error $status encountered for $deviceAddress! Disconnecting...")
                 gatt.close()
             }
         }

@@ -56,11 +56,12 @@ const DeviceList = () => {
       {/* Render other device information as needed */}
     </TouchableOpacity>
   );
+  const sortedDevices = (devices.sort((a, b) => a.rssi - b.rssi)).slice(0, 10);
 
   return (
     <SafeAreaView style={{flex: 1}}>
       <FlatList
-        data={devices}
+        data={sortedDevices}
         renderItem={renderDeviceItem}
         keyExtractor={(item, index) => item.address + index}
         windowSize={10}
@@ -81,9 +82,11 @@ const connectAlert = (name, address) => {
         onPress: () => console.log("Cancel Pressed"),
         style: "cancel"
       },
-      { text: "Connect", onPress: () => 
+      { text: "Connect", onPress: () => {
         {PermissionsModule.connectToDevice(address)} 
-        // console.log("Connect Pressed")
+        console.log("Connect Pressed for " + name + " at " + address);
+      }
+        
     }
     ],
     { cancelable: true }
@@ -100,7 +103,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     padding: 5,
     elevation: 10, // for shadow in Android
-    margin: 3,
+    margin: 5,
     marginHorizontal: 8,
     },
 

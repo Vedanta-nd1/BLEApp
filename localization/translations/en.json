@@ -12,7 +12,9 @@
             "title" : "Decoded Screen"
         },
         "settings" : {
-            "title" : "Settings"
+            "title" : "Settings",
+            "changeLangToEnglish" : "Change Language to English",
+            "changeLangToHindi" : "Change Language to Hindi"
         },
         "moreMenu": {
             "changeLanguage": "Change Language",

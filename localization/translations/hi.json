@@ -1,5 +1,5 @@
 {
-    "language": "English",
+    "language": "Hindi",
     "screens": {
         "home": {
             "filter" : "FilterHindi",
@@ -12,7 +12,9 @@
             "title" : "Decoded ScreenHindi"
         },
         "settings" : {
-            "title" : "SettingsHindi"
+            "title" : "SettingsHindi",
+            "changeLangToEnglish" : "HindiChange Language to English",
+            "changeLangToHindi" : "HindiChange Language to Hindi"
         },
         "moreMenu": {
             "changeLanguage": "Change LanguageHindi",

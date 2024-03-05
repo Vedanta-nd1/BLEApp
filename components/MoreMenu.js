@@ -3,7 +3,9 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import EntypoIcons from 'react-native-vector-icons/Entypo';
 import * as RootNavigation from '../RootNavigation.js';
 import { useTranslation } from 'react-i18next';
-import i18n from '../localization/i18n.ts';
+import i18n from '../localization/i18n.js';
+
+const { t } = useTranslation();
 
 const MoreMenu = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -27,11 +29,11 @@ const MoreMenu = () => {
           activeOpacity={1}
           onPressOut={toggleModal}>
           <View style={styles.modalContent}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {i18n.changeLanguage('en'); toggleModal();} }
               >
               <Text style={styles.modalText} >{t("changeLanguage")}</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity onPress={() => {
               toggleModal();
               RootNavigation.navigate('Settings');

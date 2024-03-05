@@ -11,7 +11,11 @@ import MoreMenu from './components/MoreMenu';
 import SettingsScreen from './screens/SettingsScreen';
 import {navigationRef} from './RootNavigation';
 const Tab = createBottomTabNavigator();
-const myRef = React.createRef();
+// const myRef = React.createRef();
+
+import './localization/i18n';
+import { useTranslation } from 'react-i18next';
+
 const {PermissionsModule} = NativeModules;
 // import DeviceList from './components/DeviceList';   
 
@@ -22,6 +26,7 @@ DeviceEventEmitter.addListener('BLEScanResult', (scanResult) => {
 
 export default function App() {
   const [isScanning, setIsScanning] = React.useState(false);
+  const { t } = useTranslation();
   
   return (
     // <SafeAreaView style={{flex: 1, alignItems: 'center' }}>
@@ -50,7 +55,7 @@ export default function App() {
                   style={styles.headerTheme}
                 >
                   {isScanning? <MaterialIcon name='square' size={16} color={'black'} style={{marginRight:8}}/> :
-                              <Text style={{color: 'black'}}>Scan</Text>}
+                              <Text style={{color: 'black'}}>{t("screens.home.scan")}</Text>}
                 </ TouchableOpacity>
                 {/* <Button onPress={
                       isScanning? ()  => {PermissionsModule.stopScanning(); setIsScanning(false)} : 

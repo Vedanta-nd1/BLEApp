@@ -1,0 +1,23 @@
+{
+    "language": "English",
+    "screens": {
+        "home": {
+            "filter" : "FilterHindi",
+            "scan": "ScanHindi"
+        },
+        "rawScreen" : {
+            "title" : "Raw ScreenHindi"
+        },
+        "decodedScreen" : {
+            "title" : "Decoded ScreenHindi"
+        },
+        "settings" : {
+            "title" : "SettingsHindi"
+        },
+        "moreMenu": {
+            "changeLanguage": "Change LanguageHindi",
+            "settings": "SettingsHindi"
+        }
+
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "language": "English",
+    "screens": {
+        "home": {
+            "filter" : "Filter",
+            "scan": "Scan"
+        },
+        "rawScreen" : {
+            "title" : "Raw Screen"
+        },
+        "decodedScreen" : {
+            "title" : "Decoded Screen"
+        },
+        "settings" : {
+            "title" : "Settings"
+        },
+        "moreMenu": {
+            "changeLanguage": "Change Language",
+            "settings": "Settings"
+        }
+
+    }
+}

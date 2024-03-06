@@ -11,7 +11,7 @@ import MoreMenu from './components/MoreMenu';
 import SettingsScreen from './screens/SettingsScreen';
 import {navigationRef} from './RootNavigation';
 const Tab = createBottomTabNavigator();
-// const myRef = React.createRef();
+const myRef = React.createRef();
 
 import './localization/i18n';
 import { useTranslation } from 'react-i18next';

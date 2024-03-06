@@ -5,11 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTranslation } from 'react-i18next';
 
 const {PermissionsModule} = NativeModules;
 
 const DeviceList = () => {
   const [devices, setDevices] = useState([]);
+  const { t } = useTranslation();
+
 
   useEffect(() => {
     DeviceEventEmitter.addListener('BLEScanResult', handleScanResult);
@@ -35,7 +38,7 @@ const DeviceList = () => {
   };
 
   const renderDeviceItem = ({ item }) => (
-    <TouchableOpacity onPress={() => {connectAlert(item.name, item.address)}}>
+    <TouchableOpacity onPress={() => {connectAlert(item.name, item.address, t)}}>
       <View style={[styles.box, {flexDirection:'row', flex:1}]}> 
         <View style={styles.btIcon} >
           <FeatherIcon name="bluetooth" style={styles.btIcon} />
@@ -72,10 +75,10 @@ const DeviceList = () => {
 
 export default DeviceList;
 
-const connectAlert = (name, address) => {
+const connectAlert = (name, address, t) => {
   Alert.alert(
     t("deviceList.connect") + " " + name + "?",
-    t("connectMessage") + "? \n" + address,
+    t("deviceList.connectMessage") + "? \n" + address,
     [
       {
         text: t("deviceList.cancel"),
@@ -86,7 +89,6 @@ const connectAlert = (name, address) => {
         {PermissionsModule.connectToDevice(address)} 
         console.log("Connect Pressed for " + name + " at " + address);
       }
-
     }
     ],
     { cancelable: true }

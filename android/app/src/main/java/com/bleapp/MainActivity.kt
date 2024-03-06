@@ -30,6 +30,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.scheduleAtFixedRate
+import kotlin.math.abs
 
 private const val ENABLE_BLUETOOTH_REQUEST_CODE = 1
 private const val RUNTIME_PERMISSION_REQUEST_CODE = 2
@@ -242,7 +243,7 @@ class MainActivity : ReactActivity() {
         private fun emitScanResultEvent(scanResult: WritableMap) {
             try {
                 val rssi = scanResult.getDouble("rssi")
-                if (rssi < -90) {
+                if (abs(rssi) > 90) {
                     Log.d("ScanResult1", "Scan result added to queue")
                     synchronized(scanResultQueue) {
                         scanResultQueue.add(scanResult)
@@ -263,7 +264,7 @@ class MainActivity : ReactActivity() {
 
         private fun startBatchProcessing() {
             isBatchProcessing = true
-            Timer().scheduleAtFixedRate(0, 3000) {
+            Timer().scheduleAtFixedRate(0, 4000) {
                 try {
                     Log.d("ScanResult1", "startBatchProcessing: 5 secs over")
                     val batchToSend = synchronized(scanResultQueue) {

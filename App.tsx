@@ -56,7 +56,7 @@ export default function App() {
                   style={styles.headerTheme}
                 >
                   {isScanning? <MaterialIcon name='square' size={16} color={'black'} style={{marginRight:8}}/> :
-                              <Text style={{color: 'black'}}>{t("screens.home.scan")}</Text>}
+                              <Text style={{color: '#224d52'}}>{t("screens.home.scan")}</Text>}
                 </ TouchableOpacity>
                 {/* <Button onPress={
                       isScanning? ()  => {PermissionsModule.stopScanning(); setIsScanning(false)} : 

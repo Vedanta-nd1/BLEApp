@@ -2,6 +2,7 @@
     "language": "English",
     "screens": {
         "home": {
+            "title": "Home",
             "filter" : "Filter",
             "scan": "Scan"
         },
@@ -13,13 +14,16 @@
         },
         "settings" : {
             "title" : "Settings",
-            "changeLangToEnglish" : "Change Language to English",
-            "changeLangToHindi" : "Change Language to Hindi"
+            "notYetFunctional" : "Not yet functional",
+            "currentLanguage" : "Current Language"
         },
         "moreMenu": {
-            "changeLanguage": "Change Language",
             "settings": "Settings"
+        },
+        "deviceList": {
+            "connect": "Connect",
+            "connectMessage": "Do you want to connect to this device",
+            "cancel": "Cancel"
         }
-
     }
 }

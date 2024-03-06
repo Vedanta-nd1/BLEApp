@@ -1,25 +1,29 @@
 {
-    "language": "Hindi",
+    "language": "हिन्दी",
     "screens": {
         "home": {
-            "filter" : "FilterHindi",
-            "scan": "ScanHindi"
+            "title": "होम",
+            "filter" : "फ़िल्टर",
+            "scan": "स्कैन"
         },
         "rawScreen" : {
-            "title" : "Raw ScreenHindi"
+            "title" : "रॉ स्क्रीन"
         },
         "decodedScreen" : {
-            "title" : "Decoded ScreenHindi"
+            "title" : "डीकोडेड स्क्रीन"
         },
         "settings" : {
-            "title" : "SettingsHindi",
-            "changeLangToEnglish" : "HindiChange Language to English",
-            "changeLangToHindi" : "HindiChange Language to Hindi"
+            "title" : "सेटिंग्स",
+            "notYetFunctional" : "अभी तक कार्यात्मक नहीं है",
+            "currentLanguage" : "वर्तमान भाषा"
         },
         "moreMenu": {
-            "changeLanguage": "Change LanguageHindi",
-            "settings": "SettingsHindi"
+            "settings": "सेटिंग्स"
         }
-
+    },
+    "deviceList": {
+        "connect": "कनेक्ट करें",
+        "connectMessage": "इस डिवाइस को कनेक्ट करें",
+        "cancel": "रद्द करें"
     }
 }

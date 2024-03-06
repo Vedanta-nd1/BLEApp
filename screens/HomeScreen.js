@@ -1,19 +1,21 @@
 import * as React from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Alert, Button } from 'react-native';
-import Box from '../components/Box.js';
+// import Box from '../components/Box.js';
 import IoniconsIcons from 'react-native-vector-icons/Ionicons';
 import DeviceList from '../components/DeviceList.js';
+import { useTranslation } from 'react-i18next';
 
 function HomeScreen({navigation, data, setData}) {
+  const { t } = useTranslation();
     return (
       <View style={{ flex: 1, flexDirection: 'column'}}>
-        <TouchableOpacity style={styles.button} onPress={() => Alert.alert("Filter")}>
+        <TouchableOpacity style={styles.button} onPress={() => Alert.alert(t("screens.home.filter"))}>
         <View style={{flexDirection:'row', justifyContent:'center', alignItems:'center',
             elevation: 5}}>
           {/* <Text style={{fontWeight: 'bold', color: 'white'}}> Y </Text> */}
           <IoniconsIcons name="funnel" size={17} color="white" />
           <Text style={{fontSize:17, color: 'white'}}> 
-            {" "}Filter 
+            {" "} {t("screens.home.filter")} 
           </Text>
         </View>
       </TouchableOpacity>

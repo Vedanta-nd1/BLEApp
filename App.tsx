@@ -74,8 +74,8 @@ export default function App() {
       >
 
         <Tab.Screen name="Home" 
-          // component={HomeScreen} 
           options={{
+            title: t("screens.home.title"),
             tabBarItemStyle: styles.barItem,
             tabBarIcon: ({color}) => <EntypoIcon name="home" size={24} color={color} />}} 
           >
@@ -83,16 +83,19 @@ export default function App() {
           </Tab.Screen>
         <Tab.Screen name="Raw" component={RawScreen}  
         options={{
+          title: t("screens.rawScreen.title"),
           tabBarItemStyle: styles.barItem,
           tabBarIcon: ({color}) => <EntypoIcon name="document-landscape" size={24} color={color} />, 
         }}/>
         <Tab.Screen name="Decoded" component={DecodedScreen} 
         options={{
+          title: t("screens.decodedScreen.title"),
           tabBarItemStyle: styles.barItem,
           tabBarIcon: ({color}) => <MaterialIcon name="qr-code-scanner" size={24} color={color} />, 
         }} />
         <Tab.Screen name="Settings" component={SettingsScreen}
         options={{
+          title: t("screens.settings.title"),
           tabBarItemStyle: styles.barItem,
           tabBarIcon: ({color}) => <MaterialIcon name="settings" size={24} color={color} />,
         }} />

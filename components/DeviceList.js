@@ -74,19 +74,19 @@ export default DeviceList;
 
 const connectAlert = (name, address) => {
   Alert.alert(
-    "Connect to " + name + "?",
-    "Do you want to connect to this device? \n" + address,
+    t("deviceList.connect") + " " + name + "?",
+    t("connectMessage") + "? \n" + address,
     [
       {
-        text: "Cancel",
+        text: t("deviceList.cancel"),
         onPress: () => console.log("Cancel Pressed"),
         style: "cancel"
       },
-      { text: "Connect", onPress: () => {
+      { text: t("deviceList.connect"), onPress: () => {
         {PermissionsModule.connectToDevice(address)} 
         console.log("Connect Pressed for " + name + " at " + address);
       }
-        
+
     }
     ],
     { cancelable: true }

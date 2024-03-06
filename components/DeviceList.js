@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, NativeModules } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, NativeModules, TextInput } from 'react-native';
 import { DeviceEventEmitter } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FeatherIcon from 'react-native-vector-icons/Feather';
@@ -12,7 +12,7 @@ const {PermissionsModule} = NativeModules;
 const DeviceList = () => {
   const [devices, setDevices] = useState([]);
   const { t } = useTranslation();
-
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     DeviceEventEmitter.addListener('BLEScanResult', handleScanResult);
@@ -59,12 +59,24 @@ const DeviceList = () => {
       {/* Render other device information as needed */}
     </TouchableOpacity>
   );
-  const sortedDevices = (devices.sort((a, b) => a.rssi - b.rssi)).slice(0, 10);
+  const modifiedDevices = (devices.sort((a, b) => a.rssi - b.rssi)).slice(0, 10);
+  const filteredDevices = searchQuery
+  ? modifiedDevices.filter(modifiedDevices =>
+      modifiedDevices.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      modifiedDevices.address.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  : modifiedDevices;
 
   return (
     <SafeAreaView style={{flex: 1}}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search by name or address"
+        onChangeText={text => setSearchQuery(text)}
+        value={searchQuery}
+      />
       <FlatList
-        data={sortedDevices}
+        data={filteredDevices}
         renderItem={renderDeviceItem}
         keyExtractor={(item, index) => item.address + index}
         windowSize={10}
@@ -80,11 +92,6 @@ const connectAlert = (name, address, t) => {
     t("deviceList.connect") + " " + name + "?",
     t("deviceList.connectMessage") + "? \n" + address,
     [
-      {
-        text: t("deviceList.cancel"),
-        onPress: () => console.log("Cancel Pressed"),
-        style: "cancel"
-      },
       { text: t("deviceList.connect"), onPress: () => {
         {PermissionsModule.connectToDevice(address)} 
         console.log("Connect Pressed for " + name + " at " + address);
@@ -137,6 +144,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'black',
     margin: 5,
-    }
-
+    },
+    searchInput: {
+      height: 40,
+      borderColor: '#224d52',
+      borderWidth: 1,
+      margin: 10,
+      paddingHorizontal: 10,
+      borderRadius: 10,
+    },
 });

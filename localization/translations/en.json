@@ -19,11 +19,11 @@
         },
         "moreMenu": {
             "settings": "Settings"
-        },
-        "deviceList": {
-            "connect": "Connect",
-            "connectMessage": "Do you want to connect to this device",
-            "cancel": "Cancel"
-        }
+        } 
+    },
+    "deviceList": {
+        "connect": "Connect",
+        "connectMessage": "Do you want to connect to this device",
+        "cancel": "Cancel"
     }
 }

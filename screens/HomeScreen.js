@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Alert, Button } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Alert,  } from 'react-native';
 // import Box from '../components/Box.js';
 import IoniconsIcons from 'react-native-vector-icons/Ionicons';
 import DeviceList from '../components/DeviceList.js';
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 function HomeScreen({navigation, data, setData}) {
   const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = React.useState('');
     return (
       <View style={{ flex: 1, flexDirection: 'column'}}>
         <TouchableOpacity style={styles.button} onPress={() => Alert.alert(t("screens.home.filter"))}>

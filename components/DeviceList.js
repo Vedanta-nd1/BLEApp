@@ -8,8 +8,8 @@ import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIc
 import { useTranslation } from 'react-i18next';
 
 const { PermissionsModule } = NativeModules;
-
-const DeviceList = ({ searchText }) => {
+ 
+const DeviceList = ({screen}) => {
   const [devices, setDevices] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { t } = useTranslation();
@@ -21,9 +21,9 @@ const DeviceList = ({ searchText }) => {
     };
   }, []);
 
-  useEffect(() => {
-    setSearchQuery(searchText);
-  }, [searchText]);
+  // useEffect(() => {
+  //   setSearchQuery(searchText);
+  // }, [searchText]);
 
   const handleScanResult = (scanResult) => {
     setDevices(prevDevices => {
@@ -41,45 +41,82 @@ const DeviceList = ({ searchText }) => {
     });
   };
 
+  const modifiedDevices = (devices.sort((a, b) => a.rssi - b.rssi)).slice(0, 10);
   const filteredDevices = searchQuery
-    ? devices.filter(device =>
-        device.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        device.address.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : devices;
+  ? modifiedDevices.filter(modifiedDevices =>
+      modifiedDevices.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      modifiedDevices.address.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  : modifiedDevices;
 
   const renderDeviceItem = ({ item }) => (
-    <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
+    screen === 'home' ? 
+      <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
       <View style={[styles.box, { flexDirection: 'row', flex: 1 }]}>
         <View style={styles.btIcon} >
           <FeatherIcon name="bluetooth" style={styles.btIcon} />
         </View>
-
         <View >
           <Text style={styles.btName}> {item.name} </Text>
           <Text style={styles.btUUID}> {item.address} </Text>
           <Text style={styles.btStrength}>
             <MaterialCommunityIcon name="wifi-strength-2" size={20} color="black" /> {" "}
-            {item.rssi}{" dbm"}  {"   "}
+            {item.rssi}{" dbm    "}  
             <FontAwesome5Icon name="arrows-alt-h" size={20} color="black" /> {" "}
             {/* 430.0 ms  */}
           </Text>
         </View>
       </View>
+    </TouchableOpacity> :
 
-      {/* Render other device information as needed */}
-    </TouchableOpacity>
+  screen === 'raw' ?
+    <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
+      <View style={[styles.boxRaw, { flexDirection: 'row' }]}>
+        <View>
+          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+            <Text style={{color: '#666', marginRight: 'auto'}}>{"<-> "}N/A</Text>
+            <View style={{alignItems: 'flex-end'}}>
+              <Text style={{color: '#666'}}>{item.rssi} dB</Text>
+            </View>
+          </View>
+
+          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+            <Text style={{color: '#666', marginRight: 'auto'}}>{item.name}</Text>
+            <View style={{alignItems: 'flex-end'}}>
+              <Text style={{color: '#666'}}>{item.address}</Text>
+            </View>
+          </View>
+          <Text style={styles.btRawData}> 
+            {item.rawData} 
+          </Text>
+        </View>
+      </View>
+  </TouchableOpacity> :
+
+  <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
+  <View style={[styles.box, { flexDirection: 'row', flex: 1 }]}>
+    <View >
+      <Text style={styles.btName}> Decoded: {item.name} </Text>
+      <Text style={styles.btUUID}> {item.address} </Text>
+      <Text style={styles.btStrength}>
+        {"Rssi: "}
+        {item.rssi}{" dbm    "}  
+      </Text>
+    </View>
+  </View>
+  </TouchableOpacity>
   );
-
+ 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Filter by name or address"
-        placeholderTextColor={'gray'}
-        onChangeText={text => setSearchQuery(text)}
-        value={searchQuery}
-      />
+      {screen === 'home' ?
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Filter by name or address"
+          placeholderTextColor={'gray'}
+          onChangeText={text => setSearchQuery(text)}
+          value={searchQuery}
+        /> : null}
       <FlatList
         data={filteredDevices}
         renderItem={renderDeviceItem}
@@ -95,7 +132,7 @@ export default DeviceList;
 const connectAlert = (name, address, t) => {
   Alert.alert(
     t("deviceList.connect") + " " + name + "?",
-    t("connectMessage") + "? \n" + address,
+    t("deviceList.connectMessage") + "? \n" + address,
     [
       {
         text: t("deviceList.connect"), onPress: () => {
@@ -120,6 +157,19 @@ const styles = StyleSheet.create({
     elevation: 10, // for shadow in Android
     margin: 5,
     marginHorizontal: 8,
+  },
+
+  boxRaw: {
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    padding: 7,
+    elevation: 10, // for shadow in Android
+    margin: 5,
+    marginHorizontal: 8,
+    borderWidth: 1,
   },
 
   btIcon: {
@@ -161,4 +211,10 @@ const styles = StyleSheet.create({
     color: '#224d52',
     backgroundColor: '#eee',
   },
+
+  btRawData: {
+    color: '#666',
+    padding: 5,
+    fontSize: 15,
+  }
 });

@@ -1,41 +1,93 @@
 import { changeLanguage } from 'i18next';
 import * as React from 'react';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Switch } from 'react-native';
 import { useTranslation } from 'react-i18next';
-// const changeLanguage = (locale) => {
-//   i18n.locale = locale;
-// };
+import KeepAwake from 'react-native-keep-awake';
 
-function SettingsScreen() {
+
+function SettingsScreen({isScanning}) {
   const { t } = useTranslation();
+  const [keepAwake, setKeepAwake] = React.useState(false);
+  const [selectedLanguage, setSelectedLanguage] = React.useState(t("language"));
+
+  const toggleSwitch = () => {
+    setKeepAwake(previousState => !previousState);
+  };
+
+  const handleLanguageChange = (language) => {
+    setSelectedLanguage(language);
+    if(language === 'English') 
+      changeLanguage('en');
+    else if (language === 'हिन्दी')
+      changeLanguage('hi');
+  }
+
     return (
       <View style={{ flex: 1 }}>
-        <View>
-          <Text style={{padding: 10, fontSize: 20, color: '#224d52'}}> {t("screens.settings.currentLanguage")}:      {t("language")} </Text>
-          <TouchableOpacity onPress={() => {changeLanguage('en');} }>
-            <Text style={styles.settingItem}> Change Language to English </Text>
+      {isScanning && keepAwake? <KeepAwake /> : null} 
+        <View style={{padding: 10}}>
+          <Text style={styles.settingHeader}> {t("screens.settings.chooseLanguage")}:</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'left'}}>
+          <TouchableOpacity onPress={() => {handleLanguageChange('English')} }>
+            <Text style={[styles.button, selectedLanguage === 'English' && styles.selectedButton]}>English</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => {changeLanguage('hi');} }>
-            <Text style={styles.settingItem}> भाषा को हिन्दी में बदलें </Text>
+          <TouchableOpacity onPress={() => {handleLanguageChange('हिन्दी');} }>
+            <Text style={[styles.button, selectedLanguage === 'हिन्दी' && styles.selectedButton]}>हिन्दी</Text>
           </TouchableOpacity>
+          </View>
         </View>
-        {/* <Text style={{fontSize:20, color: '#224d52'}}> {t("screens.settings.notYetFunctional")} </Text> */}
+  
+        <View style={styles.settingContainer}>
+        <View>
+          <Text style={styles.settingHeader}>{t("screens.settings.keepScreenOnHeader")}</Text>
+          <Text style={styles.settingDesc}>{t("screens.settings.keepScreenOnDesc")}</Text>
+        </View>
+        <Switch
+          trackColor={{ false: "#767577", true: "#94c3c8" }}
+          thumbColor={keepAwake ? "#335e63" : "#f4f3f4"}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={toggleSwitch}
+          value={keepAwake}
+        />
       </View>
+      </View>
+
+      
         );
   }
 
   export default SettingsScreen;
-
+ 
   const styles = StyleSheet.create({ 
-    settingItem: {
+    button: {
       fontSize: 18,
       padding: 13,
       margin: 5,
       borderBottomWidth: 0,
-      borderBottomColor: 'lightgray',
-      color: '#eee',
+      color: '#224d52',
       borderRadius: 15,
-      backgroundColor: '#335e63',
-      width: '75%',
-    }
-  });
+      backgroundColor: 'lightgray',
+      textAlign: 'center',
+      marginHorizontal: 10,
+    },
+    selectedButton: {
+      backgroundColor: '#224d52',
+      color: 'lightgray',
+    },
+    settingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      marginTop: 10,
+    },
+    settingHeader: {
+      fontSize: 20,
+      color: 'black'
+    },
+    settingDesc: {
+      fontSize: 18,
+      color: 'gray'
+    } 
+  });  

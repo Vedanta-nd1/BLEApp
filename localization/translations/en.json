@@ -15,7 +15,10 @@
         "settings" : {
             "title" : "Settings",
             "notYetFunctional" : "Not yet functional",
-            "currentLanguage" : "Current Language"
+            "currentLanguage" : "Current Language",
+            "chooseLanguage" : "Choose Language",
+            "keepScreenOnHeader" : "Keep Screen On",
+            "keepScreenOnDesc" : "Keep the screen on while scanning"
         },
         "moreMenu": {
             "settings": "Settings"

@@ -12,7 +12,7 @@ import SettingsScreen from './screens/SettingsScreen';
 import {navigationRef} from './RootNavigation';
 
 const Tab = createBottomTabNavigator();
-// const myRef = React.createRef();
+// const myRef = React.createRef(); 
 
 import './localization/i18n';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +39,7 @@ export default function App() {
     //   <Text>App is able to ask for permissions now.</Text>
     //   <View>{isScanning? <DeviceList /> : null}</View>
     // </SafeAreaView>
+     
     <View style={{flex: 1}}>
       <NavigationContainer ref={navigationRef}>
       <Tab.Navigator
@@ -80,26 +81,36 @@ export default function App() {
             tabBarItemStyle: styles.barItem,
             tabBarIcon: ({color}) => <EntypoIcon name="home" size={24} color={color} />}} 
           >
-          {props => <HomeScreen {...props} data={isScanning} setData={setIsScanning} />} 
+          {props => <HomeScreen {...props} isScanning={isScanning} />} 
           </Tab.Screen>
-        <Tab.Screen name="Raw" component={RawScreen}  
+
+        <Tab.Screen name="Raw" 
         options={{
           title: t("screens.rawScreen.title"),
           tabBarItemStyle: styles.barItem,
           tabBarIcon: ({color}) => <EntypoIcon name="document-landscape" size={24} color={color} />, 
-        }}/>
-        <Tab.Screen name="Decoded" component={DecodedScreen} 
+        }}>
+          {props => <RawScreen {...props} isScanning={isScanning} />} 
+        </Tab.Screen>
+
+        <Tab.Screen name="Decoded" 
         options={{
           title: t("screens.decodedScreen.title"),
           tabBarItemStyle: styles.barItem,
           tabBarIcon: ({color}) => <MaterialIcon name="qr-code-scanner" size={24} color={color} />, 
-        }} />
-        <Tab.Screen name="Settings" component={SettingsScreen}
+        }} >
+          {props => <DecodedScreen {...props} isScanning={isScanning} />}
+        </Tab.Screen>
+
+        <Tab.Screen name="Settings" 
         options={{
           title: t("screens.settings.title"),
           tabBarItemStyle: styles.barItem,
           tabBarIcon: ({color}) => <MaterialIcon name="settings" size={24} color={color} />,
-        }} />
+        }} >
+          {props => <SettingsScreen {...props} isScanning={isScanning} />}
+        </Tab.Screen>
+
       </Tab.Navigator>
     </NavigationContainer>
   </View>

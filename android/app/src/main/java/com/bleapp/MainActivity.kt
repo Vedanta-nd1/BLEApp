@@ -233,6 +233,20 @@ class MainActivity : ReactActivity() {
                 val rssi = result.rssi
                 scanResultMap.putInt("rssi", rssi)
 
+                // Adding raw data
+                val scanRecordBytes = result.scanRecord?.bytes
+                if (scanRecordBytes != null) {
+                    val rawData = StringBuilder()
+                    var lastIndex = scanRecordBytes.size - 1
+                    while (lastIndex >= 0 && scanRecordBytes[lastIndex].toInt() == 0) {
+                        lastIndex--
+                    }
+                    for (i in 0..lastIndex) {
+                        rawData.append(String.format("0x%02X\t", scanRecordBytes[i]))
+                    }
+                    scanResultMap.putString("rawData", rawData.toString())
+                }
+
                 emitScanResultEvent(scanResultMap)
             }
         }
@@ -264,7 +278,7 @@ class MainActivity : ReactActivity() {
 
         private fun startBatchProcessing() {
             isBatchProcessing = true
-            Timer().scheduleAtFixedRate(0, 4000) {
+            Timer().scheduleAtFixedRate(0, 5000) {
                 try {
                     Log.d("ScanResult1", "startBatchProcessing: 5 secs over")
                     val batchToSend = synchronized(scanResultQueue) {

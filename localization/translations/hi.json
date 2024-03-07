@@ -15,7 +15,10 @@
         "settings" : {
             "title" : "सेटिंग्स",
             "notYetFunctional" : "अभी तक कार्यात्मक नहीं है",
-            "currentLanguage" : "वर्तमान भाषा"
+            "currentLanguage" : "वर्तमान भाषा",
+            "chooseLanguage" : "भाषा चुनें",
+            "keepScreenOnHeader" : "स्क्रीन चालू रखें",
+            "keepScreenOnDesc" : "स्कैन करते समय स्क्रीन चालू रखें"
         },
         "moreMenu": {
             "settings": "सेटिंग्स"

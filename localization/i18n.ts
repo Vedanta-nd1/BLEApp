@@ -46,6 +46,7 @@ i18n
     .use(initReactI18next)
     .use(languageDetectorPlugin as any) // Casting to 'any' temporarily
     .init({
+        react: {useSuspense: false}, 
         resources,
         compatibilityJSON: 'v3',
         // fallback language is set to english

@@ -28,5 +28,6 @@
         "connect": "Connect",
         "connectMessage": "Do you want to connect to this device",
         "cancel": "Cancel"
-    }
+    },
+    "temp": "iOS App"
 }

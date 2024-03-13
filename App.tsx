@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { StyleSheet, Text, View, Alert, TouchableOpacity, NativeModules, Button, DeviceEventEmitter, SafeAreaView } from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { StyleSheet, Text, View, Platform , TouchableOpacity, NativeModules, Button, DeviceEventEmitter,  } from 'react-native';
+import { NavigationContainer, } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/HomeScreen';
 import RawScreen from './screens/RawScreen';
@@ -12,34 +12,30 @@ import SettingsScreen from './screens/SettingsScreen';
 import {navigationRef} from './RootNavigation';
 
 const Tab = createBottomTabNavigator();
-// const myRef = React.createRef(); 
 
 import './localization/i18n';
 import { useTranslation } from 'react-i18next';
 
 const {PermissionsModule} = NativeModules;
-// import DeviceList from './components/DeviceList';   
+const { BluetoothManager } = NativeModules;
 
-DeviceEventEmitter.addListener('BLEScanResult', (scanResult) => {
-  console.log('Received scan result:', scanResult);
-  // Access parameters: scanResult.name, scanResult.address, scanResult.rssi
-});
+// DeviceEventEmitter.addListener('BLEScanResult', (scanResult) => {
+//   console.log('Received scan result:', scanResult);
+//   // Access parameters: scanResult.name, scanResult.address, scanResult.rssi
+// });
 
 export default function App() {
   const [isScanning, setIsScanning] = React.useState(false);
-  const { t } = useTranslation();
-  
+    const { t } = useTranslation();
+
   return (
-    // <SafeAreaView style={{flex: 1, alignItems: 'center' }}>
-    //   <Button onPress={
-    //       isScanning? ()  => {PermissionsModule.stopScanning(); setIsScanning(false)} : 
-    //                   () =>  {PermissionsModule.startScanning(); setIsScanning(true)}
-    //   } 
-    //     title={isScanning? 'stop' : 'scan'}  />
-    //   <Text>App is able to ask for permissions now.</Text>
-    //   <View>{isScanning? <DeviceList /> : null}</View>
-    // </SafeAreaView>
-     
+    
+    // <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#eee'}}>
+    //   <Button title='Start Scanning' onPress={() => BluetoothManager.startScanning()} />
+    //   <Text>{t("temp")}</Text>
+    // </View>
+    
+    <View style={styles.safeContainer}>
     <View style={{flex: 1}}>
       <NavigationContainer ref={navigationRef}>
       <Tab.Navigator
@@ -55,16 +51,11 @@ export default function App() {
                                 () =>  {PermissionsModule.startScanning(); setIsScanning(true)}
                   }
                   style={styles.headerTheme}
-                >
+                > 
                   {isScanning? <MaterialIcon name='square' size={16} color={'black'} style={{marginRight:8}}/> :
                               <Text style={{color: '#224d52'}}>{t("screens.home.scan")}</Text>}
                 </ TouchableOpacity>
-                {/* <Button onPress={
-                      isScanning? ()  => {PermissionsModule.stopScanning(); setIsScanning(false)} : 
-                                  () =>  {PermissionsModule.startScanning(); setIsScanning(true)}
-                      } 
-                    title={isScanning? 'stop' : 'scan'}
-                    color ={'#fff'}  /> */}
+                <Button title='calendar' onPress={() => BluetoothManager.startScan()} />
               </View>
               
               <View style={{padding:10, justifyContent: 'center'}} >
@@ -114,6 +105,7 @@ export default function App() {
       </Tab.Navigator>
     </NavigationContainer>
   </View>
+  </View>
   );
 }
 
@@ -129,5 +121,9 @@ const styles = StyleSheet.create({
   },
   barItem: {
     padding: 4,
-  }
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
 });

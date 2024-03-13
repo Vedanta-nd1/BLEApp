@@ -15,7 +15,7 @@ function HomeScreen({isScanning}) {
       </View>
     );
   }
-
+ 
   const styles = StyleSheet.create({
     box: {
       height: '19%',

@@ -27,7 +27,8 @@
     "deviceList": {
         "connect": "Connect",
         "connectMessage": "Do you want to connect to this device",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "connected": "Connected"
     },
     "temp": "iOS App"
 }

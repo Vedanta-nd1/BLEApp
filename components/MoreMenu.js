@@ -16,7 +16,9 @@ const MoreMenu = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={toggleModal} >
-        <EntypoIcons name="dots-three-vertical" size={20} style={styles.moreText} />
+        <View>
+          <EntypoIcons name="dots-three-vertical" size={20} style={styles.moreText} />
+        </View>
       </TouchableOpacity>
       <Modal
         animationType="fade"
@@ -56,6 +58,7 @@ const styles = StyleSheet.create({
   moreText: {
     color: 'black',
     fontSize: 16,
+    padding: 5,
   },
 
   modalText: {

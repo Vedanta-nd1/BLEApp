@@ -27,7 +27,8 @@
     "deviceList": {
         "connect": "कनेक्ट करें",
         "connectMessage": "इस डिवाइस को कनेक्ट करें",
-        "cancel": "रद्द करें"
+        "cancel": "रद्द करें",
+        "connected": "कनेक्टेड है"
     },
     "temp": "टेम्परेचर"
 }

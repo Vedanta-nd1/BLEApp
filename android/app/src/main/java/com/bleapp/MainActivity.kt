@@ -257,7 +257,7 @@ class MainActivity : ReactActivity() {
         private fun emitScanResultEvent(scanResult: WritableMap) {
             try {
                 val rssi = scanResult.getDouble("rssi")
-                if (abs(rssi) < 50) {
+                if (abs(rssi) < 90) {
                     Log.d("ScanResult1", "Scan result added to queue")
                     synchronized(scanResultQueue) {
                         scanResultQueue.add(scanResult)

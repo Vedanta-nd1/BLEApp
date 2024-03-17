@@ -16,6 +16,10 @@
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		E325B1822BA0673A00D2A4DD /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E325B1812BA0673A00D2A4DD /* BluetoothManager.swift */; };
 		E325B1842BA0678F00D2A4DD /* BluetoothManagerBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = E325B1832BA0678F00D2A4DD /* BluetoothManagerBridge.m */; };
+		E3998B872BA2C5FB00CD4AB0 /* CustomAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3998B862BA2C5FB00CD4AB0 /* CustomAlertManager.swift */; };
+		E3998B892BA2C65B00CD4AB0 /* AlertManagerBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = E3998B882BA2C65B00CD4AB0 /* AlertManagerBridge.m */; };
+		E3998B8B2BA4176D00CD4AB0 /* ReactNativeBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3998B8A2BA4176D00CD4AB0 /* ReactNativeBridge.swift */; };
+		E3998B8D2BA4192600CD4AB0 /* ReactNativeBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = E3998B8C2BA4192600CD4AB0 /* ReactNativeBridge.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +53,10 @@
 		E325B1812BA0673A00D2A4DD /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
 		E325B1832BA0678F00D2A4DD /* BluetoothManagerBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BluetoothManagerBridge.m; sourceTree = "<group>"; };
 		E357E5462B9AF59300C23522 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Fonts; path = "../node_modules/react-native-vector-icons/Fonts"; sourceTree = "<group>"; };
+		E3998B862BA2C5FB00CD4AB0 /* CustomAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAlertManager.swift; sourceTree = "<group>"; };
+		E3998B882BA2C65B00CD4AB0 /* AlertManagerBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlertManagerBridge.m; sourceTree = "<group>"; };
+		E3998B8A2BA4176D00CD4AB0 /* ReactNativeBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactNativeBridge.swift; sourceTree = "<group>"; };
+		E3998B8C2BA4192600CD4AB0 /* ReactNativeBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReactNativeBridge.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -102,6 +110,10 @@
 				E325B1812BA0673A00D2A4DD /* BluetoothManager.swift */,
 				E325B1802BA0673900D2A4DD /* BLEApp-Bridging-Header.h */,
 				E325B1832BA0678F00D2A4DD /* BluetoothManagerBridge.m */,
+				E3998B862BA2C5FB00CD4AB0 /* CustomAlertManager.swift */,
+				E3998B882BA2C65B00CD4AB0 /* AlertManagerBridge.m */,
+				E3998B8A2BA4176D00CD4AB0 /* ReactNativeBridge.swift */,
+				E3998B8C2BA4192600CD4AB0 /* ReactNativeBridge.m */,
 			);
 			name = BLEApp;
 			sourceTree = "<group>";
@@ -405,7 +417,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				E325B1822BA0673A00D2A4DD /* BluetoothManager.swift in Sources */,
+				E3998B8D2BA4192600CD4AB0 /* ReactNativeBridge.m in Sources */,
+				E3998B8B2BA4176D00CD4AB0 /* ReactNativeBridge.swift in Sources */,
 				E325B1842BA0678F00D2A4DD /* BluetoothManagerBridge.m in Sources */,
+				E3998B872BA2C5FB00CD4AB0 /* CustomAlertManager.swift in Sources */,
+				E3998B892BA2C65B00CD4AB0 /* AlertManagerBridge.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
@@ -489,6 +505,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RALY6A2ZYN;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = BLEApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -501,7 +518,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.netradyne.BLEAppVedant;
 				PRODUCT_NAME = BLEApp;
 				SWIFT_OBJC_BRIDGING_HEADER = "BLEApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -517,6 +534,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RALY6A2ZYN;
 				INFOPLIST_FILE = BLEApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -528,7 +546,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.netradyne.BLEAppVedant;
 				PRODUCT_NAME = BLEApp;
 				SWIFT_OBJC_BRIDGING_HEADER = "BLEApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

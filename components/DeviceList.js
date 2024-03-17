@@ -1,31 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, NativeModules, TextInput } from 'react-native';
-import { DeviceEventEmitter } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, NativeModules, TextInput, Platform } from 'react-native';
+import { DeviceEventEmitter, NativeEventEmitter } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTranslation } from 'react-i18next';
 
-const { PermissionsModule } = NativeModules;
- 
+const { PermissionsModule } = NativeModules;  //  Android module
+const { BluetoothManager } = NativeModules;  //  iOS module
+
 const DeviceList = ({screen}) => {
   const [devices, setDevices] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { t } = useTranslation();
 
+  // useEffect(() => {
+  //   DeviceEventEmitter.addListener('BLEScanResult', handleScanResult);
+  //   return () => {
+  //     DeviceEventEmitter.removeAllListeners();
+  //   };
+  // }, []);
+
+  //   useEffect(() => {
+  //   DeviceEventEmitter.addListener('BLEScanResult', handleScanResult);
+  //   return () => {
+  //     DeviceEventEmitter.removeAllListeners();
+  //   };
+  // }, []);
+
+
   useEffect(() => {
-    DeviceEventEmitter.addListener('BLEScanResult', handleScanResult);
+    const eventEmitter = Platform.OS === 'ios' ? DeviceEventEmitter : new NativeEventEmitter(BluetoothManager);
+    const eventName = Platform.OS === 'ios' ? 'BLEScanResultFromIOS' : 'BLEScanResult';
+    
+    const subscription = eventEmitter.addListener(eventName, handleScanResult);
     return () => {
-      DeviceEventEmitter.removeAllListeners();
+      Platform.OS === 'ios' ? subscription.remove() : DeviceEventEmitter.removeAllListeners();
     };
   }, []);
 
-  // useEffect(() => {
-  //   setSearchQuery(searchText);
-  // }, [searchText]);
+//   useEffect(() => {
+//     const eventEmitter = new NativeEventEmitter(BluetoothManager);
+//     const subscription = eventEmitter.addListener('StrongestPeripheralsReceived', (data) => {
+//         console.log('Received strongest peripherals:');
+//         console.log(data); // This will log the data received from native side
+//     });
+
+//     return () => {
+//         subscription.remove();
+//     };
+// }, []);
 
   const handleScanResult = (scanResult) => {
+    console.log('Scan Result:', scanResult);
     setDevices(prevDevices => {
       const existingDeviceIndex = prevDevices.findIndex(device => device.address === scanResult.address);
 
@@ -41,7 +69,7 @@ const DeviceList = ({screen}) => {
     });
   };
 
-  const modifiedDevices = (devices.sort((a, b) => a.rssi - b.rssi)).slice(0, 10);
+  const modifiedDevices = (devices.sort((a, b) => b.rssi - a.rssi)).slice(0, 15);
   const filteredDevices = searchQuery
   ? modifiedDevices.filter(modifiedDevices =>
       modifiedDevices.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -53,16 +81,17 @@ const DeviceList = ({screen}) => {
     screen === 'home' ? 
       <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
       <View style={[styles.box, { flexDirection: 'row', flex: 1 }]}>
-        <View style={styles.btIcon} >
+        <View style={[styles.btIcon, {backgroundColor: '#224d52'}]} >
           <FeatherIcon name="bluetooth" style={styles.btIcon} />
         </View>
         <View >
-          <Text style={styles.btName}> {item.name} </Text>
+          <Text style={styles.btName}> {item.name}  {item.state == 0 ? null : 
+              <Text style={{color: 'green'}}>{t("deviceList.connected")}</Text>}</Text>
           <Text style={styles.btUUID}> {item.address} </Text>
           <Text style={styles.btStrength}>
             <MaterialCommunityIcon name="wifi-strength-2" size={20} color="black" /> {" "}
             {item.rssi}{" dbm    "}  
-            <FontAwesome5Icon name="arrows-alt-h" size={20} color="black" /> {" "}
+            {/* <FontAwesome5Icon name="arrows-alt-h" size={20} color="black" /> {" "} */}
             {/* 430.0 ms  */}
           </Text>
         </View>
@@ -80,7 +109,7 @@ const DeviceList = ({screen}) => {
             </View>
           </View>
 
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+          <View style={{flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between'}}>
             <Text style={{color: '#666', marginRight: 'auto'}}>{item.name}</Text>
             <View style={{alignItems: 'flex-end'}}>
               <Text style={{color: '#666'}}>{item.address}</Text>
@@ -108,15 +137,14 @@ const DeviceList = ({screen}) => {
   );
  
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {screen === 'home' ?
+    <SafeAreaView style={{ flex: 1,  marginTop: 0 }}>
         <TextInput
           style={styles.searchInput}
           placeholder="Filter by name or address"
           placeholderTextColor={'gray'}
           onChangeText={text => setSearchQuery(text)}
           value={searchQuery}
-        /> : null}
+        /> 
       <FlatList
         data={filteredDevices}
         renderItem={renderDeviceItem}
@@ -136,10 +164,16 @@ const connectAlert = (name, address, t) => {
     [
       {
         text: t("deviceList.connect"), onPress: () => {
-          { PermissionsModule.connectToDevice(address) }
+          Platform.OS === 'ios' ? BluetoothManager.connectToDevice(address) :
+                                  PermissionsModule.connectToDevice(address) 
           console.log("Connect Pressed for " + name + " at " + address);
         }
-      }
+      },
+      Platform.OS === 'ios' ? {
+        text: t("deviceList.cancel"),
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel"
+      } : null
     ],
     { cancelable: true }
   );
@@ -176,7 +210,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     justifyContent: 'center',
     alignContent: 'center',
-    backgroundColor: '#224d52',
+    // backgroundColor: '#224d52',
     color: 'white',
     height: 50,
     borderRadius: 25,

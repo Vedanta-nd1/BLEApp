@@ -3,4 +3,8 @@
 //
 
 #import "BLEManager.h"
-#import <React/RCTBridgeModule.h>
+#import "React/RCTBridgeModule.h"
+#import "React/RCTEventEmitter.h"
+
+@interface BluetoothManager : NSObject <RCTBridgeModule>
+@end

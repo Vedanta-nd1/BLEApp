@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, Text, View, Platform , TouchableOpacity, NativeModules, Button, DeviceEventEmitter,  } from 'react-native';
+import { StyleSheet, Text, View, Platform , TouchableOpacity, NativeModules } from 'react-native';
 import { NavigationContainer, } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/HomeScreen';
@@ -23,16 +23,42 @@ const { BluetoothManager } = NativeModules;
 //   console.log('Received scan result:', scanResult);
 //   // Access parameters: scanResult.name, scanResult.address, scanResult.rssi
 // });
+// DeviceEventEmitter.addListener('TestEvent', (data) => {
+//   console.log('Received:');
+//   console.log(data); // This will log the data received from native side
+// });
 
 export default function App() {
   const [isScanning, setIsScanning] = React.useState(false);
     const { t } = useTranslation();
 
+//   React.useEffect(() => {
+//     const eventEmitter = new NativeEventEmitter(BluetoothManager);
+//     const subscription = eventEmitter.addListener('StrongestPeripheralsReceived', (data) => {
+//         console.log('Received strongest peripherals:');
+//         console.log(data); // This will log the data received from native side
+//     });
+
+//     return () => {
+//         subscription.remove();
+//     };
+// }, []);
+
+
   return (
     
     // <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#eee'}}>
-    //   <Button title='Start Scanning' onPress={() => BluetoothManager.startScanning()} />
-    //   <Text>{t("temp")}</Text>
+    // {/* <Button title='Get data' onPress={() => sendMessageToNative()} /> */}
+    // <TouchableOpacity
+    //   onPress={
+    //     isScanning? ()  => {BluetoothManager.stopScanning(); setIsScanning(false)} : 
+    //                 () =>  {BluetoothManager.startScanning(); setIsScanning(true)}
+    //   }
+    //   style={[styles.headerTheme, {backgroundColor: isScanning? 'pink': 'lightgreen'}]}
+    // > 
+    // <Text style={{color: '#224d52'}}>{isScanning? "Stop": "Scan"}</Text>
+    // </ TouchableOpacity>
+    //   <Text>iOS App</Text>
     // </View>
     
     <View style={styles.safeContainer}>
@@ -47,6 +73,9 @@ export default function App() {
               <View style={{}} >
                 <TouchableOpacity
                   onPress={
+                    Platform.OS === 'ios'? 
+                    isScanning? ()  => {BluetoothManager.stopScanning(); setIsScanning(false)} : 
+                                () =>  {BluetoothManager.startScanning(); setIsScanning(true)} :
                     isScanning? ()  => {PermissionsModule.stopScanning(); setIsScanning(false)} : 
                                 () =>  {PermissionsModule.startScanning(); setIsScanning(true)}
                   }
@@ -55,7 +84,6 @@ export default function App() {
                   {isScanning? <MaterialIcon name='square' size={16} color={'black'} style={{marginRight:8}}/> :
                               <Text style={{color: '#224d52'}}>{t("screens.home.scan")}</Text>}
                 </ TouchableOpacity>
-                <Button title='calendar' onPress={() => BluetoothManager.startScan()} />
               </View>
               
               <View style={{padding:10, justifyContent: 'center'}} >

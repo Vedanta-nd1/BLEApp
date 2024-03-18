@@ -15,6 +15,7 @@ const Tab = createBottomTabNavigator();
 
 import './localization/i18n';
 import { useTranslation } from 'react-i18next';
+import DeviceList from './components/DeviceList';
 
 const {PermissionsModule} = NativeModules;
 const { BluetoothManager } = NativeModules;
@@ -100,7 +101,7 @@ export default function App() {
             tabBarItemStyle: styles.barItem,
             tabBarIcon: ({color}) => <EntypoIcon name="home" size={24} color={color} />}} 
           >
-          {props => <HomeScreen {...props} isScanning={isScanning} />} 
+          {props => <HomeScreen {...props} setIsScanning={setIsScanning}/>} 
           </Tab.Screen>
 
         <Tab.Screen name="Raw" 
@@ -109,17 +110,17 @@ export default function App() {
           tabBarItemStyle: styles.barItem,
           tabBarIcon: ({color}) => <EntypoIcon name="document-landscape" size={24} color={color} />, 
         }}>
-          {props => <RawScreen {...props} isScanning={isScanning} />} 
+          {props => <RawScreen {...props} setIsScanning={setIsScanning} />} 
         </Tab.Screen>
 
-        <Tab.Screen name="Decoded" 
+        {/* <Tab.Screen name="Decoded" 
         options={{
           title: t("screens.decodedScreen.title"),
           tabBarItemStyle: styles.barItem,
           tabBarIcon: ({color}) => <MaterialIcon name="qr-code-scanner" size={24} color={color} />, 
         }} >
           {props => <DecodedScreen {...props} isScanning={isScanning} />}
-        </Tab.Screen>
+        </Tab.Screen> */}
 
         <Tab.Screen name="Settings" 
         options={{

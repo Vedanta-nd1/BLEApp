@@ -3,32 +3,24 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, NativeModule
 import { DeviceEventEmitter, NativeEventEmitter } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
+// import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTranslation } from 'react-i18next';
 
 const { PermissionsModule } = NativeModules;  //  Android module
 const { BluetoothManager } = NativeModules;  //  iOS module
 
-const DeviceList = ({screen}) => {
+const DeviceList = ({screen, setIsScanning}) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [devices, setDevices] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { t } = useTranslation();
 
-  // useEffect(() => {
-  //   DeviceEventEmitter.addListener('BLEScanResult', handleScanResult);
-  //   return () => {
-  //     DeviceEventEmitter.removeAllListeners();
-  //   };
-  // }, []);
-
-  //   useEffect(() => {
-  //   DeviceEventEmitter.addListener('BLEScanResult', handleScanResult);
-  //   return () => {
-  //     DeviceEventEmitter.removeAllListeners();
-  //   };
-  // }, []);
-
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setDevices([]);
+    setIsRefreshing(false);
+  }
 
   useEffect(() => {
     const eventEmitter = Platform.OS === 'ios' ? DeviceEventEmitter : new NativeEventEmitter(BluetoothManager);
@@ -69,7 +61,7 @@ const DeviceList = ({screen}) => {
     });
   };
 
-  const modifiedDevices = (devices.sort((a, b) => b.rssi - a.rssi)).slice(0, 15);
+  const modifiedDevices = (devices.sort((a, b) => b.rssi - a.rssi).slice(0, 20));
   const filteredDevices = searchQuery
   ? modifiedDevices.filter(modifiedDevices =>
       modifiedDevices.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,14 +71,13 @@ const DeviceList = ({screen}) => {
 
   const renderDeviceItem = ({ item }) => (
     screen === 'home' ? 
-      <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
+      <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t, setIsScanning) }}>
       <View style={[styles.box, { flexDirection: 'row', flex: 1 }]}>
         <View style={[styles.btIcon, {backgroundColor: '#224d52'}]} >
           <FeatherIcon name="bluetooth" style={styles.btIcon} />
         </View>
         <View >
-          <Text style={styles.btName}> {item.name}  {item.state == 0 ? null : 
-              <Text style={{color: 'green'}}>{t("deviceList.connected")}</Text>}</Text>
+          <Text style={styles.btName}> {item.name}  </Text>
           <Text style={styles.btUUID}> {item.address} </Text>
           <Text style={styles.btStrength}>
             <MaterialCommunityIcon name="wifi-strength-2" size={20} color="black" /> {" "}
@@ -99,43 +90,30 @@ const DeviceList = ({screen}) => {
     </TouchableOpacity> :
 
   screen === 'raw' ?
-    <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
-      <View style={[styles.boxRaw, { flexDirection: 'row' }]}>
-        <View>
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-            <Text style={{color: '#666', marginRight: 'auto'}}>{"<-> "}N/A</Text>
-            <View style={{alignItems: 'flex-end'}}>
-              <Text style={{color: '#666'}}>{item.rssi} dB</Text>
-            </View>
-          </View>
-
-          <View style={{flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between'}}>
-            <Text style={{color: '#666', marginRight: 'auto'}}>{item.name}</Text>
-            <View style={{alignItems: 'flex-end'}}>
-              <Text style={{color: '#666'}}>{item.address}</Text>
-            </View>
-          </View>
-          <Text style={styles.btRawData}> 
-            {item.rawData} 
-          </Text>
+  <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
+  <View style={[styles.boxRaw, { flexDirection: 'row' }]}>
+    <View>
+      <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+        <Text style={{color: '#666', marginRight: 'auto'}}>{"<-> "}N/A</Text>
+        <View style={{alignItems: 'flex-end'}}>
+          <Text style={{color: '#666'}}>{item.rssi} dB</Text>
         </View>
       </View>
-  </TouchableOpacity> :
 
-  <TouchableOpacity onPress={() => { connectAlert(item.name, item.address, t) }}>
-  <View style={[styles.box, { flexDirection: 'row', flex: 1 }]}>
-    <View >
-      <Text style={styles.btName}> Decoded: {item.name} </Text>
-      <Text style={styles.btUUID}> {item.address} </Text>
-      <Text style={styles.btStrength}>
-        {"Rssi: "}
-        {item.rssi}{" dbm    "}  
+      <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+        <Text style={{color: '#666', marginRight: 'auto'}}>{item.name}</Text>
+        <View style={{alignItems: 'flex-end'}}>
+          <Text style={{color: '#666'}}>{item.address}</Text>
+        </View>
+      </View>
+      <Text style={styles.btRawData}> 
+        {item.rawData} 
       </Text>
     </View>
   </View>
-  </TouchableOpacity>
+</TouchableOpacity> : null
   );
- 
+
   return (
     <SafeAreaView style={{ flex: 1,  marginTop: 0 }}>
         <TextInput
@@ -149,7 +127,9 @@ const DeviceList = ({screen}) => {
         data={filteredDevices}
         renderItem={renderDeviceItem}
         keyExtractor={(item, index) => item.address + index}
-        windowSize={10}
+        windowSize={1}
+        refreshing={isRefreshing}
+        onRefresh={() => handleRefresh()}
       />
     </SafeAreaView>
   );
@@ -157,7 +137,7 @@ const DeviceList = ({screen}) => {
 
 export default DeviceList;
 
-const connectAlert = (name, address, t) => {
+const connectAlert = (name, address, t, setIsScanning) => {
   Alert.alert(
     t("deviceList.connect") + " " + name + "?",
     t("deviceList.connectMessage") + "? \n" + address,
@@ -167,6 +147,7 @@ const connectAlert = (name, address, t) => {
           Platform.OS === 'ios' ? BluetoothManager.connectToDevice(address) :
                                   PermissionsModule.connectToDevice(address) 
           console.log("Connect Pressed for " + name + " at " + address);
+          setIsScanning(false);
         }
       },
       Platform.OS === 'ios' ? {

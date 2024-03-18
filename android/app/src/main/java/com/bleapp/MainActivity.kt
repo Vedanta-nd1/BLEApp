@@ -29,8 +29,6 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.concurrent.scheduleAtFixedRate
-import kotlin.math.abs
 
 private const val ENABLE_BLUETOOTH_REQUEST_CODE = 1
 private const val RUNTIME_PERMISSION_REQUEST_CODE = 2
@@ -38,6 +36,32 @@ const val TAG = "custom_tag"
 
 @Suppress("DEPRECATION")
 class MainActivity : ReactActivity() {
+    private var timer: Timer? = null
+    private var timerTask: TimerTask? = null
+
+    private fun startTimer() {
+        // Schedule the timer task to run every 5 seconds
+        timer = Timer()
+        timerTask = MyTimerTask()
+        timer?.scheduleAtFixedRate(timerTask, 0, 5000)
+    }
+
+    private fun stopTimer() {
+        // Cancel the timer and timer task
+        timer?.cancel()
+        timerTask?.cancel()
+    }
+
+    inner class MyTimerTask : TimerTask() {
+        @RequiresApi(Build.VERSION_CODES.N)
+        override fun run() {
+            // This code will run periodically
+            Log.d("timer", "Timer over")
+            // Call your function here
+            scanCallback.startBatchProcessing()
+        }
+    }
+
     private var isScanning = false
     private val bluetoothAdapter: BluetoothAdapter by lazy {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -110,9 +134,9 @@ class MainActivity : ReactActivity() {
             }
             bleScanner.startScan(null, scanSettings, scanCallback)
             isScanning = true
+            startTimer()
         }
     }
-
 
 
     private fun Context.hasPermission(permissionType: String): Boolean {
@@ -213,6 +237,8 @@ class MainActivity : ReactActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     private val scanCallback = object : ScanCallback() {
         @RequiresApi(Build.VERSION_CODES.N)
+        private val uniqueAddresses: MutableSet<String> = HashSet()
+
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             with(result.device) {
@@ -225,77 +251,65 @@ class MainActivity : ReactActivity() {
                     return
                 }
 
-                // Emitting the scan result to React Native side
-                val scanResultMap = Arguments.createMap()
-                scanResultMap.putString("name", name ?: "Unnamed")
-                scanResultMap.putString("address", address)
-                // Add other parameters as needed
-                val rssi = result.rssi
-                scanResultMap.putInt("rssi", rssi)
+                // Check if the address is already in the set of unique addresses
+                if (!uniqueAddresses.contains(address)) {
+                    // Emitting the scan result to React Native side
+                    val scanResultMap = Arguments.createMap()
+                    scanResultMap.putString("name", name ?: "Unnamed")
+                    scanResultMap.putString("address", address)
+                    // Add other parameters as needed
+                    val rssi = result.rssi
+                    scanResultMap.putInt("rssi", rssi)
 
-                // Adding raw data
-                val scanRecordBytes = result.scanRecord?.bytes
-                if (scanRecordBytes != null) {
-                    val rawData = StringBuilder()
-                    var lastIndex = scanRecordBytes.size - 1
-                    while (lastIndex >= 0 && scanRecordBytes[lastIndex].toInt() == 0) {
-                        lastIndex--
+                    // Adding raw data
+                    val scanRecordBytes = result.scanRecord?.bytes
+                    if (scanRecordBytes != null) {
+                        val rawData = StringBuilder()
+                        var lastIndex = scanRecordBytes.size - 1
+                        while (lastIndex >= 0 && scanRecordBytes[lastIndex].toInt() == 0) {
+                            lastIndex--
+                        }
+                        for (i in 0..lastIndex) {
+                            rawData.append(String.format("0x%02X\t", scanRecordBytes[i]))
+                        }
+                        scanResultMap.putString("rawData", rawData.toString())
                     }
-                    for (i in 0..lastIndex) {
-                        rawData.append(String.format("0x%02X\t", scanRecordBytes[i]))
+
+                    Log.d("ScanResult1", "Scan result added to queue")
+                    synchronized(scanResultQueue) {
+                        scanResultQueue.add(scanResultMap)
+                        uniqueAddresses.add(address)
+                        if (scanResultQueue.size > 15) {
+                            val removedScanResult = scanResultQueue.poll() // Remove lowest RSSI if queue size exceeds 20
+                            // Remove the address from the set to ensure uniqueness
+                            removedScanResult?.getString("address")?.let { uniqueAddresses.remove(it) }
+                        }
                     }
-                    scanResultMap.putString("rawData", rawData.toString())
                 }
-
-                emitScanResultEvent(scanResultMap)
             }
         }
 
         private val scanResultQueue: PriorityQueue<WritableMap> = PriorityQueue(compareBy { it.getDouble("rssi") })
         private var isBatchProcessing: Boolean = false
 
-        private fun emitScanResultEvent(scanResult: WritableMap) {
+        fun startBatchProcessing() {
+            isBatchProcessing = true
             try {
-                val rssi = scanResult.getDouble("rssi")
-                if (abs(rssi) < 90) {
-                    Log.d("ScanResult1", "Scan result added to queue")
-                    synchronized(scanResultQueue) {
-                        scanResultQueue.add(scanResult)
-                        if (scanResultQueue.size > 10) {
-                            scanResultQueue.poll() // Remove lowest RSSI if queue size exceeds 20
-                        }
-                    }
-                    if (!isBatchProcessing) {
-                        Log.d("ScanResult1", "Starting batch processing")
-                        startBatchProcessing()
-                    }
+                val batchToSend = synchronized(scanResultQueue) {
+                    val batch = ArrayList(scanResultQueue)
+                    scanResultQueue.clear()
+                    batch
+                }
+                if (batchToSend.isNotEmpty()) {
+                    sendBatch(batchToSend)
+                    batchToSend.clear()
+                    uniqueAddresses.clear()
+                } else {
+                    stopBatchProcessing()
                 }
             } catch (e: Exception) {
-                Log.e("ScanResult1", "Error processing scan result: ${e.message}")
+                // Handle any exceptions, e.g., log them
                 e.printStackTrace()
-            }
-        }
-
-        private fun startBatchProcessing() {
-            isBatchProcessing = true
-            Timer().scheduleAtFixedRate(0, 5000) {
-                try {
-                    Log.d("ScanResult1", "startBatchProcessing: 5 secs over")
-                    val batchToSend = synchronized(scanResultQueue) {
-                        val batch = ArrayList(scanResultQueue)
-                        scanResultQueue.clear()
-                        batch
-                    }
-                    if (batchToSend.isNotEmpty()) {
-                        sendBatch(batchToSend)
-                        batchToSend.clear()
-                    } else {
-                        stopBatchProcessing()
-                    }
-                } catch (e: Exception) {
-                    // Handle any exceptions, e.g., log them
-                    e.printStackTrace()
-                }
             }
         }
 
@@ -335,6 +349,7 @@ class MainActivity : ReactActivity() {
             //    ActivityCompat#requestPermissions
             return
         }
+        stopTimer()
         bleScanner.stopScan(scanCallback)
         isScanning = false
     }
@@ -394,45 +409,6 @@ class MainActivity : ReactActivity() {
     }
 
 
-
-//    private fun hasForegroundLocationPermission() =
-//        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-//
-//    private fun hasBackgroundLocationPermission() =
-//        ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-//
-//    @RequiresApi(Build.VERSION_CODES.S)
-//    private fun hasBluetoothScanPermission() =
-//        ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
-//
-//    @RequiresApi(Build.VERSION_CODES.S)
-//    private fun hasBluetoothConnectPermission() =
-//        ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
-
-//    @RequiresApi(Build.VERSION_CODES.S)
-//    @ReactMethod
-//    fun requestPermissions() {
-//        var permissionsToRequest = mutableListOf<String>()
-//        val intent = Intent("com.bleapp.EVENT_TRIGGERED")
-//        sendBroadcast(intent)
-//
-//        if(!hasBackgroundLocationPermission()) {
-//            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
-//        }
-//        if(!hasForegroundLocationPermission()) {
-//            permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
-//        }
-//        if(!hasBluetoothScanPermission()) {
-//            permissionsToRequest.add(Manifest.permission.BLUETOOTH_SCAN)
-//        }
-//        if(!hasBluetoothConnectPermission()) {
-//            permissionsToRequest.add(Manifest.permission.BLUETOOTH_CONNECT)
-//        }
-//
-//        if(permissionsToRequest.isNotEmpty()) {
-//            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), 0)
-//        }
-//    }
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onRequestPermissionsResult(

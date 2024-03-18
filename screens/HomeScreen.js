@@ -5,12 +5,12 @@ import { View, StyleSheet, } from 'react-native';
 import DeviceList from '../components/DeviceList.js';
 import { useTranslation } from 'react-i18next';
 
-function HomeScreen({isScanning}) {
+function HomeScreen({setIsScanning}) {
   const { t } = useTranslation();
     return (
       <View style={{ flex: 1, flexDirection: 'column'}}>
 
-      {isScanning? <DeviceList screen='home' /> : null}
+      <DeviceList screen='home' setIsScanning={setIsScanning} />
         
       </View>
     );

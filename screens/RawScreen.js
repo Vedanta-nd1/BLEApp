@@ -6,13 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const item = {"address": "05:2F:89:2D:08:27", "name": "Unnamed", "rawData": "0x1E        0xFF    0x06    0x00   0x01     0x09    0x20    0x22    0xAF    0x96    0x8A    0x47    0x84    0x33    0x1E    0x4C    0x33    0x02    0x3A    0x3E   0x7D     0x85    0x3D    0x0B    0x7D    0x0E    0x28    0xD7    0x5E    0xE8    0xA3    ", "rssi": -91}
 
-function RawScreen({isScanning}) {
+function RawScreen({setIsScanning}) {
     return (
       <SafeAreaView style={{ flex: 1, flexDirection: 'column'}}>
 
-      {isScanning? <DeviceList screen='raw' /> : 
-          null
-      }
+      <DeviceList screen='raw' setIsScanning={setIsScanning}/>
          
       </SafeAreaView>
     );

@@ -6,10 +6,10 @@
             "filter" : "फ़िल्टर",
             "scan": "स्कैन"
         },
-        "rawScreen" : {
+        "raw" : {
             "title" : "रॉ स्क्रीन"
         },
-        "decodedScreen" : {
+        "decoded" : {
             "title" : "डीकोडेड स्क्रीन"
         },
         "settings" : {
@@ -28,7 +28,8 @@
         "connect": "कनेक्ट करें",
         "connectMessage": "इस डिवाइस को कनेक्ट करें",
         "cancel": "रद्द करें",
-        "connected": "कनेक्टेड है"
+        "connected": "कनेक्टेड है",
+        "searchPlaceHolder": "नाम या पते से खोजें"
     },
     "temp": "टेम्परेचर"
 }

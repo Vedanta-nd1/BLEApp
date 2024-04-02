@@ -1,16 +1,12 @@
 import * as React from 'react';
 import { View, StyleSheet, } from 'react-native';
-// import Box from '../components/Box.js';
-// import IoniconsIcons from 'react-native-vector-icons/Ionicons';
 import DeviceList from '../components/DeviceList.js';
-import { useTranslation } from 'react-i18next';
 
 function HomeScreen({setIsScanning}) {
-  const { t } = useTranslation();
     return (
-      <View style={{ flex: 1, flexDirection: 'column'}}>
+      <View style={{ flex: 1 }}>
 
-      <DeviceList screen='home' setIsScanning={setIsScanning} />
+      <DeviceList style={{flex: 1}} screen='home' setIsScanning={setIsScanning} />
         
       </View>
     );

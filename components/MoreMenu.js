@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Platform } from 'react-native';
 import EntypoIcons from 'react-native-vector-icons/Entypo';
 import * as RootNavigation from '../RootNavigation.js';
 import { useTranslation } from 'react-i18next';
+import { testProps } from './testProps.js';
 
 
 const MoreMenu = () => {
@@ -14,13 +15,14 @@ const MoreMenu = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accesssible={false}>
       <TouchableOpacity onPress={toggleModal} >
-        <View>
-          <EntypoIcons name="dots-three-vertical" size={20} style={styles.moreText} />
-        </View>
+        {/* <View > */}
+          <EntypoIcons {...testProps('moreMenu')} name="dots-three-vertical" size={20} style={styles.moreText} />
+        {/* </View> */}
       </TouchableOpacity>
       <Modal
+        accessible={false}
         animationType="fade"
         transparent={true}
         visible={modalVisible}
@@ -29,21 +31,14 @@ const MoreMenu = () => {
           style={styles.modalContainer}
           activeOpacity={1}
           onPressOut={toggleModal}>
-          <View style={styles.modalContent}>
-            {/* <TouchableOpacity
-              onPress={() => {i18n.changeLanguage('en'); toggleModal();} }
-              >
-              <Text style={styles.modalText} >{t("changeLanguage")}</Text>
-            </TouchableOpacity> */}
+          <View style={styles.modalContent} {...testProps('modalBackground')}>
             <TouchableOpacity onPress={() => {
               toggleModal();
               RootNavigation.navigate('Settings');
-            }}>
-              <Text style={styles.modalText} >{t("screens.moreMenu.settings")}</Text>
+              }} 
+              accessible={false}>
+              <Text {...testProps('modalSettingsButton')} style={styles.modalText}>{t("screens.moreMenu.settings")}</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity>
-              <Text style={styles.modalText} >Option 3</Text>
-            </TouchableOpacity> */}
           </View>
         </TouchableOpacity>
       </Modal>
@@ -53,7 +48,8 @@ const MoreMenu = () => {
 
 const styles = StyleSheet.create({
   container: {
-    zIndex: 9999, // Ensure it's above other components
+    zIndex: 999, // Ensure it's above other components
+    flex: 1,
   },
   moreText: {
     color: 'black',
@@ -72,20 +68,18 @@ const styles = StyleSheet.create({
     flex: 1, 
     flexDirection: 'row-reverse',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
+    },
 
   modalContent: {
-    marginTop: 30,
+    marginTop: Platform.OS === 'ios' ? 70 : 30,
     marginRight: 15,
     backgroundColor: 'white',
-    alignContent: 'left',
-    justifyContent: 'top',
     padding: 10,
     paddingRight: 20,
     borderRadius: 5,
     elevation: 5,
     position: 'absolute',
-    zIndex: 99999, // Ensure it's above other components
+    zIndex: 999, // Ensure it's above other components
   },
 });
 

@@ -6,10 +6,10 @@
             "filter" : "Filter",
             "scan": "Scan"
         },
-        "rawScreen" : {
+        "raw" : {
             "title" : "Raw Screen"
         },
-        "decodedScreen" : {
+        "decoded" : {
             "title" : "Decoded Screen"
         },
         "settings" : {
@@ -28,7 +28,8 @@
         "connect": "Connect",
         "connectMessage": "Do you want to connect to this device",
         "cancel": "Cancel",
-        "connected": "Connected"
+        "connected": "Connected",
+        "searchPlaceHolder": "Find by name or address"
     },
     "temp": "iOS App"
 }

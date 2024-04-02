@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, Switch } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import KeepAwake from 'react-native-keep-awake';
+import { testProps } from '../components/testProps';
 
 function SettingsScreen({isScanning}) {
   const { t } = useTranslation();
@@ -43,16 +44,18 @@ function SettingsScreen({isScanning}) {
     <View style={{ flex: 1 }}>
       {isScanning && keepAwake? <KeepAwake /> : null} 
       <View style={{padding: 10}}>
-        <Text style={styles.settingHeader}> {t("screens.settings.chooseLanguage")}:</Text>
-        <View style={{flexDirection: 'row', justifyContent: 'left'}}>
-          <TouchableOpacity onPress={() => {handleLanguageChange('English')} }>
-            <View style={[styles.button, selectedLanguage === 'English' && styles.selectedButton]}>
-              <Text style={[styles.button, selectedLanguage === 'English' && styles.selectedButton]}>English</Text>
+        <Text style={styles.settingHeader} accessible={false} {...testProps('chooseLanguage')} >{t("screens.settings.chooseLanguage")}</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'flex-start'}} >
+          <TouchableOpacity onPress={() => {handleLanguageChange('English')} } {...testProps('englishButton')} >
+            <View style={[styles.button, selectedLanguage === 'English' && styles.selectedButton]} >
+              <Text style={[styles.button, selectedLanguage === 'English' && styles.selectedButton]}
+                >English</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => {handleLanguageChange('हिन्दी');} }>
-            <View style={[styles.button, selectedLanguage === 'हिन्दी' && styles.selectedButton]}>
-              <Text style={[styles.button, selectedLanguage === 'हिन्दी' && styles.selectedButton]}>हिन्दी</Text>
+          <TouchableOpacity onPress={() => {handleLanguageChange('हिन्दी');} } {...testProps('hindiButton')}>
+            <View style={[styles.button, selectedLanguage === 'हिन्दी' && styles.selectedButton]} >
+              <Text style={[styles.button, selectedLanguage === 'हिन्दी' && styles.selectedButton]}
+                 >हिन्दी</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -60,10 +63,11 @@ function SettingsScreen({isScanning}) {
 
       <View style={styles.settingContainer}>
         <View>
-          <Text style={styles.settingHeader}>{t("screens.settings.keepScreenOnHeader")}</Text>
-          <Text style={styles.settingDesc}>{t("screens.settings.keepScreenOnDesc")}</Text>
+          <Text style={styles.settingHeader} {...testProps('keepScreenOnHeader')} >{t("screens.settings.keepScreenOnHeader")}</Text>
+          <Text style={styles.settingDesc} {...testProps('keepScreenOnDesc')}>{t("screens.settings.keepScreenOnDesc")}</Text>
         </View>
         <Switch
+          {...testProps('keepAwakeSwitch')}
           trackColor={{ false: "#767577", true: "#94c3c8" }}
           thumbColor={keepAwake ? "#335e63" : "#f4f3f4"}
           ios_backgroundColor="#3e3e3e"

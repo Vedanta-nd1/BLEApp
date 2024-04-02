@@ -3,9 +3,10 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, NativeModule
 import { DeviceEventEmitter, NativeEventEmitter } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-// import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTranslation } from 'react-i18next';
+
+import { testProps } from './testProps';
 
 const { PermissionsModule } = NativeModules;  //  Android module
 const { BluetoothManager } = NativeModules;  //  iOS module
@@ -32,17 +33,6 @@ const DeviceList = ({screen, setIsScanning}) => {
     };
   }, []);
 
-//   useEffect(() => {
-//     const eventEmitter = new NativeEventEmitter(BluetoothManager);
-//     const subscription = eventEmitter.addListener('StrongestPeripheralsReceived', (data) => {
-//         console.log('Received strongest peripherals:');
-//         console.log(data); // This will log the data received from native side
-//     });
-
-//     return () => {
-//         subscription.remove();
-//     };
-// }, []);
 
   const handleScanResult = (scanResult) => {
     console.log('Scan Result:', scanResult);
@@ -99,7 +89,6 @@ const DeviceList = ({screen, setIsScanning}) => {
           <Text style={{color: '#666'}}>{item.rssi} dB</Text>
         </View>
       </View>
-
       <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
         <Text style={{color: '#666', marginRight: 'auto'}}>{item.name}</Text>
         <View style={{alignItems: 'flex-end'}}>
@@ -115,14 +104,15 @@ const DeviceList = ({screen, setIsScanning}) => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1,  marginTop: 0 }}>
+    <View style={{ flex: 1 }} {...testProps('searchInput')}>
         <TextInput
-          style={styles.searchInput}
-          placeholder="Filter by name or address"
+          style={[styles.searchInput]}
+          placeholder={t("deviceList.searchPlaceHolder")}
           placeholderTextColor={'gray'}
           onChangeText={text => setSearchQuery(text)}
           value={searchQuery}
         /> 
+      <SafeAreaView>
       <FlatList
         data={filteredDevices}
         renderItem={renderDeviceItem}
@@ -131,7 +121,8 @@ const DeviceList = ({screen, setIsScanning}) => {
         refreshing={isRefreshing}
         onRefresh={() => handleRefresh()}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 

@@ -408,8 +408,6 @@ class MainActivity : ReactActivity() {
         }
     }
 
-
-
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onRequestPermissionsResult(
         requestCode: Int,

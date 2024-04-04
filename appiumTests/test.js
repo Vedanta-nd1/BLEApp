@@ -64,8 +64,10 @@ async function testLanguage(lang, client) {
 
     await checkHeaderText('~homeTab', lang.screens.home.title, client);
     await checkHeaderText('~rawTab', lang.screens.raw.title, client);
-    await (client.$('~homeTab').click());
+    await ((await client.$('~homeTab')).click());
+    await checkText('~searchInput', lang.deviceList.searchPlaceHolder, client);
     await checkHeaderText('~settingsTab', lang.screens.settings.title, client);
+
 
 }
 
@@ -81,11 +83,11 @@ async function checkText(accessibilityId, expectedText, client) {
 async function checkHeaderText(accessibilityId, expectedText, client) {
     const element = await client.$(accessibilityId);
     var text = (await element.getText());
-    console.log('\n \n' + text + '\n \n');
+    // console.log('\n \n' + text + '\n \n');
     text = (text.split(','))[0];
 
     if (text !== expectedText) {
-        throw new Error('${accessibilityId} text is not correct');
+        throw new Error(accessibilityId + ' text is not expected');
     }
 }
 

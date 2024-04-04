@@ -104,8 +104,9 @@ const DeviceList = ({screen, setIsScanning}) => {
   );
 
   return (
-    <View style={{ flex: 1 }} {...testProps('searchInput')}>
+    <View style={{ flex: 1 }} >
         <TextInput
+          {...testProps('searchInput')}
           style={[styles.searchInput]}
           placeholder={t("deviceList.searchPlaceHolder")}
           placeholderTextColor={'gray'}
